@@ -1,0 +1,108 @@
+@model HandyGo.web.Models.User
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "My Wallet";
+    var userRole = HttpContextAccessor.HttpContext.Session.GetString("UserRole");
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h2 class="fw-bold mb-4"><i class="bi bi-wallet2 text-primary me-2"></i> Financial Wallet</h2>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success"><i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]</div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]</div>
+            }
+
+            <div class="card bg-primary text-white shadow border-0 rounded-4 mb-4">
+                <div class="card-body p-5 text-center">
+                    <h5 class="text-white-50 mb-3">
+                        @(userRole == "Technician" ? "Available Balance for Withdrawal (Your Earnings)" : "Available Wallet Balance (For Purchases)")
+                    </h5>
+                    <h1 class="display-3 fw-bold mb-0">@Model.WalletBalance.ToString("0.00") <span class="fs-4">EGP</span></h1>
+                </div>
+            </div>
+
+            @if (userRole == "Technician")
+            {
+                if (Model.WalletBalance > 0)
+                {
+                    <div class="card shadow-sm border-0 rounded-4">
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold mb-4"><i class="bi bi-cash-coin me-2"></i> Request Withdrawal</h5>
+                            
+                            <form asp-controller="Wallet" asp-action="RequestWithdrawal" method="post">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Amount to Withdraw</label>
+                                        <input type="number" name="amount" class="form-control" max="@Model.WalletBalance" min="50" step="0.01" required placeholder="e.g. 150">
+                                        <small class="text-muted">Minimum withdrawal is 50 EGP</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Withdrawal Method</label>
+                                        <select name="withdrawMethod" class="form-select" required>
+                                            <option value="VodafoneCash">Vodafone Cash</option>
+                                            <option value="InstaPay">InstaPay</option>
+                                            <option value="BankTransfer">Bank Transfer</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold">Transfer Details (Wallet Number / Account Number)</label>
+                                        <input type="text" name="details" class="form-control" required placeholder="Enter phone number or InstaPay handle here...">
+                                    </div>
+                                    <div class="col-12 mt-4">
+                                        <button type="submit" class="btn btn-success w-100 fw-bold py-2">
+                                            Confirm Withdrawal Request <i class="bi bi-arrow-right-circle ms-1"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info text-center rounded-4 p-4">
+                        <i class="bi bi-info-circle fs-1 d-block mb-2"></i>
+                        <h5 class="fw-bold">Your current balance does not allow withdrawal</h5>
+                        <p class="mb-0">Complete more orders to increase your wallet earnings.</p>
+                    </div>
+                }
+            }
+
+            @if (userRole == "Client")
+            {
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4"><i class="bi bi-credit-card-2-front me-2"></i> Recharge Wallet</h5>
+                        
+                        <form asp-controller="Wallet" asp-action="Recharge" method="post">
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label fw-bold">Amount to Recharge (EGP)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-cash text-success"></i></span>
+                                        <input type="number" name="amount" class="form-control form-control-lg" min="10" step="1" required placeholder="Enter amount here...">
+                                    </div>
+                                    <small class="text-muted">You can use this balance to pay for service costs easily later.</small>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold">
+                                        Recharge Now <i class="bi bi-lightning-charge-fill ms-1"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

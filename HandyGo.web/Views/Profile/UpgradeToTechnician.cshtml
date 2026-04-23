@@ -1,0 +1,201 @@
+@model HandyGo.web.ViewModels.UpgradeToTechnicianViewModel
+@{
+    ViewData["Title"] = "Join as Technician";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/@@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<style>
+    
+    .tagify {
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 5px;
+        background: #fff;
+    }
+
+    .tagify--focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    
+    .input-group-text {
+        border-radius: 12px 0 0 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .input-group .form-control {
+        border-radius: 0;
+    }
+
+    .input-group .btn {
+        border-radius: 0 12px 12px 0;
+    }
+
+    
+    #map {
+        height: 250px;
+        width: 100%;
+        border-radius: 12px;
+        display: none;
+        margin-top: 15px;
+        border: 2px solid #e2e8f0;
+        z-index: 1;
+    }
+</style>
+
+<div class="container mt-5 mb-5" style="max-width: 650px;">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-5">
+            <div class="text-center mb-4">
+                <i class="bi bi-tools text-primary" style="font-size: 3rem;"></i>
+                <h2 class="fw-bold mt-2">Complete Your Professional Profile</h2>
+                <p class="text-muted">Clients trust technicians who provide complete and accurate data.</p>
+            </div>
+
+            <form asp-action="UpgradeToTechnician" method="post">
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Contact Phone Number</label>
+                        <input asp-for="Phone" class="form-control" placeholder="e.g., 01012345678" />
+                        <span asp-validation-for="Phone" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Technical Specialty</label>
+                        <select asp-for="Category" class="form-select">
+                            <option value="">-- Select Specialty --</option>
+                            <option value="Plumber">Plumber</option>
+                            <option value="Electrician">Electrician</option>
+                            <option value="AC">AC Specialist</option>
+                        </select>
+                        <span asp-validation-for="Category" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-4 p-3 bg-light rounded-3 border">
+                    <label class="form-label fw-bold">Your Location (To connect you with nearby clients)</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="bi bi-geo-alt text-danger"></i></span>
+                        <input asp-for="Address" class="form-control" id="Address" placeholder="Street name, Area..." />
+                        <button type="button" class="btn btn-outline-primary fw-bold" onclick="getLocation()" id="btnLocation">
+                            <i class="bi bi-crosshair"></i> Locate Me
+                        </button>
+                    </div>
+                    <span asp-validation-for="Address" class="text-danger small d-block mt-1"></span>
+                    <small id="locationStatus" class="text-muted mt-1 d-block"><i class="bi bi-info-circle"></i> Click to capture your coordinates and show the map.</small>
+
+                    <div id="map"></div>
+
+                    <input type="hidden" asp-for="Latitude" id="Latitude" />
+                    <input type="hidden" asp-for="Longitude" id="Longitude" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Top Skills <span class="text-muted fw-normal">(Type a skill and press Enter)</span></label>
+                    <input asp-for="Skills" placeholder="e.g., Split AC repair, Freon charging, Electrical wiring..." />
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Certifications or Courses <span class="text-muted fw-normal">(Optional - Press Enter to separate)</span></label>
+                    <input asp-for="Certificates" placeholder="e.g., Industrial Diploma, Samsung Certified..." />
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold mt-2">
+                    Save & Join as Technician <i class="bi bi-rocket-takeoff ms-1"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@@yaireo/tagify"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+
+    var skillsInput = document.querySelector('input[name=Skills]');
+    var certsInput = document.querySelector('input[name=Certificates]');
+
+    new Tagify(skillsInput, { originalInputValueFormat: valuesArr => valuesArr.map(item => item.value).join(',') });
+    new Tagify(certsInput, { originalInputValueFormat: valuesArr => valuesArr.map(item => item.value).join(',') });
+
+    let map, marker;
+
+    function getLocation() {
+        var btn = document.getElementById("btnLocation");
+        var status = document.getElementById("locationStatus");
+
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+        btn.disabled = true;
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Captured';
+                btn.classList.replace("btn-outline-primary", "btn-success");
+                status.innerHTML = "<span class='text-success fw-bold'><i class='bi bi-check-all'></i> Location captured! You can drag the pin on the map to adjust.</span>";
+
+                initMap(lat, lng);
+                updateLocationDetails(lat, lng);
+
+            }, function(error) {
+                btn.innerHTML = '<i class="bi bi-crosshair"></i> Locate Me';
+                btn.disabled = false;
+                status.innerHTML = "<span class='text-danger fw-bold'>Please allow location access in your browser.</span>";
+            });
+        } else {
+            status.innerHTML = "<span class='text-danger'>Geolocation is not supported by your browser.</span>";
+        }
+    }
+
+    function initMap(lat, lng) {
+        document.getElementById('map').style.display = 'block';
+
+        if(!map) {
+
+            map = L.map('map').setView([lat, lng], 16);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            marker = L.marker([lat, lng], {draggable: true}).addTo(map);
+
+            marker.on('dragend', function(e) {
+                var position = marker.getLatLng();
+                updateLocationDetails(position.lat, position.lng);
+            });
+
+            map.on('click', function(e) {
+                marker.setLatLng(e.latlng);
+                updateLocationDetails(e.latlng.lat, e.latlng.lng);
+            });
+
+        } else {
+
+            map.setView([lat, lng], 16);
+            marker.setLatLng([lat, lng]);
+        }
+    }
+
+    function updateLocationDetails(lat, lng) {
+
+        document.getElementById("Latitude").value = lat;
+        document.getElementById("Longitude").value = lng;
+
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=en`)
+            .then(response => response.json())
+            .then(data => {
+                if(data && data.display_name) {
+
+                    document.getElementById("Address").value = data.display_name;
+                }
+            })
+            .catch(err => console.log("Error fetching address:", err));
+    }
+</script>

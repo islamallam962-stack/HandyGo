@@ -1,0 +1,238 @@
+@model HandyGo.web.Models.User
+@{
+    ViewData["Title"] = "Premium Subscription Plans";
+    bool isTech = Model.Role == "Technician";
+}
+
+<style>
+    body { background-color: #f4f7f6; }
+    
+    .pricing-card {
+        border: none;
+        border-radius: 20px;
+        transition: transform 0.3s, box-shadow 0.3s;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .pricing-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+    
+    .pricing-header {
+        padding: 30px 20px;
+        color: white;
+        text-align: center;
+    }
+    
+    .price-value { font-size: 3rem; font-weight: 900; }
+    .price-currency { font-size: 1.2rem; font-weight: normal; }
+    .price-duration { font-size: 1rem; opacity: 0.8; }
+    
+    .feature-list { list-style: none; padding: 0; margin: 25px 0; }
+    .feature-list li { margin-bottom: 15px; font-size: 1rem; color: #4a5568; }
+    .feature-list li i { color: #28a745; margin-right: 10px; font-size: 1.2rem; }
+    
+    .card-basic .pricing-header { background: linear-gradient(135deg, #6c757d 0%, #495057 100%); }
+    .card-pro .pricing-header { background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); }
+    .card-enterprise .pricing-header { background: linear-gradient(135deg, #fd7e14 0%, #d35400 100%); }
+    
+    .popular-badge {
+        position: absolute;
+        top: 15px;
+        right: -35px;
+        background: #ffc107;
+        color: #000;
+        padding: 5px 40px;
+        transform: rotate(45deg);
+        font-weight: bold;
+        font-size: 0.8rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+</style>
+
+<div class="container py-5">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success rounded-4 shadow-sm mb-4"><i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger rounded-4 shadow-sm mb-4"><i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]</div>
+    }
+
+    <div class="text-center mb-5">
+        <h1 class="fw-bold text-dark">Upgrade your experience with <span class="text-primary">HandyGo</span> plans</h1>
+        <p class="text-muted fs-5">
+            @(isTech ? "Get more orders, lower commissions, and a trust badge that sets you apart." : "Get permanent discounts, service priority, and exclusive guarantees.")
+        </p>
+        <div class="badge bg-light text-dark border px-4 py-2 mt-2 fs-6 rounded-pill">
+            <i class="bi bi-wallet2 text-success me-1"></i> Current Wallet Balance: <strong>@Model.WalletBalance EGP</strong>
+        </div>
+    </div>
+
+    @if (isTech)
+    {
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-4 col-md-6">
+                <div class="card pricing-card card-basic shadow-sm h-100">
+                    <div class="pricing-header">
+                        <h4 class="fw-bold mb-3">Star Plan</h4>
+                        <div><span class="price-value">200</span> <span class="price-currency">EGP</span></div>
+                        <div class="price-duration">Per Month</div>
+                    </div>
+                    <div class="card-body p-4 text-center">
+                        <ul class="feature-list text-start">
+                            <li><i class="bi bi-check-circle-fill"></i> Commission reduced to <strong>8%</strong></li>
+                            <li><i class="bi bi-check-circle-fill"></i> <strong>Featured Tech</strong> badge by your name</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Advanced appearance in search results</li>
+                            <li class="text-muted"><i class="bi bi-x-circle text-muted"></i> Personal account manager</li>
+                        </ul>
+                        <form asp-action="Subscribe" method="post">
+                            <input type="hidden" name="planCode" value="Tech200">
+                            <input type="hidden" name="price" value="200">
+                            <input type="hidden" name="durationMonths" value="1">
+                            <button type="submit" class="btn btn-outline-secondary w-100 rounded-pill fw-bold" @(Model.SubscriptionPlan == "Tech200" ? "disabled" : "")>
+                                @(Model.SubscriptionPlan == "Tech200" ? "Current Plan" : "Subscribe Now")
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="card pricing-card card-pro shadow h-100" style="transform: scale(1.05); z-index: 2;">
+                    <div class="popular-badge">Most Popular</div>
+                    <div class="pricing-header">
+                        <h4 class="fw-bold mb-3"><i class="bi bi-star-fill text-warning me-2"></i>Professional Plan</h4>
+                        <div><span class="price-value">500</span> <span class="price-currency">EGP</span></div>
+                        <div class="price-duration">Per Month</div>
+                    </div>
+                    <div class="card-body p-4 text-center">
+                        <ul class="feature-list text-start">
+                            <li><i class="bi bi-check-circle-fill"></i> Commission reduced to <strong>5% only</strong></li>
+                            <li><i class="bi bi-check-circle-fill"></i> <strong>Golden VIP</strong> badge ??</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Maximum priority for receiving orders</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Unlimited bids on offers</li>
+                        </ul>
+                        <form asp-action="Subscribe" method="post">
+                            <input type="hidden" name="planCode" value="Tech500">
+                            <input type="hidden" name="price" value="500">
+                            <input type="hidden" name="durationMonths" value="1">
+                            <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold py-2" @(Model.SubscriptionPlan == "Tech500" ? "disabled" : "")>
+                                @(Model.SubscriptionPlan == "Tech500" ? "Current Plan" : "Subscribe Now")
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="card pricing-card card-enterprise shadow-sm h-100">
+                    <div class="pricing-header">
+                        <h4 class="fw-bold mb-3">Contractor Plan</h4>
+                        <div><span class="price-value">5000</span> <span class="price-currency">EGP</span></div>
+                        <div class="price-duration">Annually (Save 1000 EGP)</div>
+                    </div>
+                    <div class="card-body p-4 text-center">
+                        <ul class="feature-list text-start">
+                            <li><i class="bi bi-check-circle-fill"></i> <strong>0% Commission</strong> (Keep all profits)</li>
+                            <li><i class="bi bi-check-circle-fill"></i> <strong>Platinum</strong> badge ??</li>
+                            <li><i class="bi bi-check-circle-fill"></i> 24/7 Account Manager & Support</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Exclusive homepage visibility</li>
+                        </ul>
+                        <form asp-action="Subscribe" method="post">
+                            <input type="hidden" name="planCode" value="Tech5000">
+                            <input type="hidden" name="price" value="5000">
+                            <input type="hidden" name="durationMonths" value="12">
+                            <button type="submit" class="btn btn-outline-danger w-100 rounded-pill fw-bold" @(Model.SubscriptionPlan == "Tech5000" ? "disabled" : "")>
+                                @(Model.SubscriptionPlan == "Tech5000" ? "Current Plan" : "Subscribe Now")
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-4 col-md-6">
+                <div class="card pricing-card card-basic shadow-sm h-100">
+                    <div class="pricing-header">
+                        <h4 class="fw-bold mb-3">Golden Client</h4>
+                        <div><span class="price-value">500</span> <span class="price-currency">EGP</span></div>
+                        <div class="price-duration">Per Month</div>
+                    </div>
+                    <div class="card-body p-4 text-center">
+                        <ul class="feature-list text-start">
+                            <li><i class="bi bi-check-circle-fill"></i> Fixed <strong>5%</strong> discount on all orders</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Priority in technician response speed</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Dedicated support for Golden Clients</li>
+                        </ul>
+                        <form asp-action="Subscribe" method="post">
+                            <input type="hidden" name="planCode" value="Client500">
+                            <input type="hidden" name="price" value="500">
+                            <input type="hidden" name="durationMonths" value="1">
+                            <button type="submit" class="btn btn-outline-secondary w-100 rounded-pill fw-bold" @(Model.SubscriptionPlan == "Client500" ? "disabled" : "")>
+                                @(Model.SubscriptionPlan == "Client500" ? "Current Plan" : "Subscribe Now")
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="card pricing-card card-pro shadow h-100" style="transform: scale(1.05); z-index: 2;">
+                    <div class="popular-badge">For Business</div>
+                    <div class="pricing-header">
+                        <h4 class="fw-bold mb-3">Business Plan</h4>
+                        <div><span class="price-value">5000</span> <span class="price-currency">EGP</span></div>
+                        <div class="price-duration">Semi-annual (6 Months)</div>
+                    </div>
+                    <div class="card-body p-4 text-center">
+                        <ul class="feature-list text-start">
+                            <li><i class="bi bi-check-circle-fill"></i> Fixed <strong>10%</strong> ongoing discount</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Assigned <strong>5-star only</strong> technicians</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Instant money-back guarantee on disputes</li>
+                        </ul>
+                        <form asp-action="Subscribe" method="post">
+                            <input type="hidden" name="planCode" value="Client5000">
+                            <input type="hidden" name="price" value="5000">
+                            <input type="hidden" name="durationMonths" value="6">
+                            <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold py-2" @(Model.SubscriptionPlan == "Client5000" ? "disabled" : "")>
+                                @(Model.SubscriptionPlan == "Client5000" ? "Current Plan" : "Subscribe Now")
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="card pricing-card card-enterprise shadow-sm h-100">
+                    <div class="pricing-header">
+                        <h4 class="fw-bold mb-3">Enterprise Plan</h4>
+                        <div><span class="price-value">10000</span> <span class="price-currency">EGP</span></div>
+                        <div class="price-duration">Annually</div>
+                    </div>
+                    <div class="card-body p-4 text-center">
+                        <ul class="feature-list text-start">
+                            <li><i class="bi bi-check-circle-fill"></i> <strong>15% discount</strong> on all platform services</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Account manager & Tax Invoicing (B2B)</li>
+                            <li><i class="bi bi-check-circle-fill"></i> Free emergency visits (Once per month)</li>
+                        </ul>
+                        <form asp-action="Subscribe" method="post">
+                            <input type="hidden" name="planCode" value="Client10000">
+                            <input type="hidden" name="price" value="10000">
+                            <input type="hidden" name="durationMonths" value="12">
+                            <button type="submit" class="btn btn-outline-danger w-100 rounded-pill fw-bold" @(Model.SubscriptionPlan == "Client10000" ? "disabled" : "")>
+                                @(Model.SubscriptionPlan == "Client10000" ? "Current Plan" : "Subscribe Now")
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

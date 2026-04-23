@@ -1,0 +1,392 @@
+@model List<HandyGo.web.Models.Message>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+<style>
+    body {
+        background-color: #d1d7db;
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .chat-wrapper {
+        max-width: 900px;
+        margin: 20px auto;
+        height: 85vh;
+        display: flex;
+        flex-direction: column;
+        background: #efeae2;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        overflow: hidden;
+    }
+
+    
+    .chat-header {
+        padding: 10px 20px;
+        background: #f0f2f5;
+        border-bottom: 1px solid #d1d7db;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 10;
+    }
+
+    .header-user-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        text-decoration: none;
+        color: #111b21;
+    }
+
+        .header-user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .header-user-info span {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+    .btn-delete-chat {
+        background: none;
+        border: none;
+        color: #8696a0;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        .btn-delete-chat:hover {
+            color: #f15c6d;
+        }
+
+    
+    .chat-body {
+        flex: 1;
+        padding: 20px 5%;
+        overflow-y: auto;
+        
+        background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+        background-color: #efeae2;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .message-row {
+        display: flex;
+        margin-bottom: 12px;
+        width: 100%;
+    }
+
+        .message-row.me {
+            justify-content: flex-end;
+        }
+
+        .message-row.other {
+            justify-content: flex-start;
+        }
+
+    .bubble {
+        max-width: 65%;
+        padding: 8px 12px;
+        border-radius: 8px;
+        position: relative;
+        box-shadow: 0 1px 0.5px rgba(11,20,26,.13);
+        font-size: 0.95rem;
+        word-wrap: break-word;
+        color: #111b21;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .me .bubble {
+        background: #d9fdd3;
+        border-top-right-radius: 0;
+    }
+
+    .other .bubble {
+        background: #ffffff;
+        border-top-left-radius: 0;
+    }
+
+    .msg-image {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 6px;
+        margin-bottom: 5px;
+        cursor: pointer;
+        object-fit: cover;
+    }
+
+    .timestamp {
+        font-size: 0.65rem;
+        color: #667781;
+        align-self: flex-end;
+        margin-top: 4px;
+        margin-left: 15px;
+    }
+
+    
+    .chat-footer {
+        background: #f0f2f5;
+        padding: 10px 20px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    
+    #imagePreviewContainer {
+        display: none;
+        position: relative;
+        margin-bottom: 10px;
+        padding: 10px;
+        background: #e9edef;
+        border-radius: 8px;
+        width: max-content;
+    }
+
+    #imagePreview {
+        max-height: 120px;
+        border-radius: 6px;
+    }
+
+    .remove-image-btn {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #54656f;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+        .remove-image-btn:hover {
+            background: #f15c6d;
+        }
+
+    .input-container {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .file-upload-label {
+        cursor: pointer;
+        color: #54656f;
+        font-size: 1.5rem;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+    }
+
+        .file-upload-label:hover {
+            color: #00a884;
+        }
+
+    .input-container input[type="text"] {
+        flex: 1;
+        border: none;
+        background: #ffffff;
+        padding: 12px 15px;
+        border-radius: 8px;
+        outline: none;
+        font-size: 0.95rem;
+    }
+
+    .btn-send {
+        background: none;
+        color: #54656f;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: 0.2s;
+    }
+
+        .btn-send:hover {
+            color: #00a884;
+        }
+</style>
+
+<div class="chat-wrapper">
+    <div class="chat-header">
+        <a href="/Profile/Details/@ViewBag.OtherUserId" class="header-user-info">
+            <img src="@ViewBag.OtherUserImage" alt="User" />
+            <span>@ViewBag.OtherUserName</span>
+        </a>
+
+        <form asp-action="DeleteChat" method="post" onsubmit="return confirm('Â· √‰  „ √ﬂœ „‰ Õ–› Â–Â «·„Õ«œÀ…ø');">
+            <input type="hidden" name="requestId" value="@ViewBag.RequestId" />
+            <button type="submit" class="btn-delete-chat" title="Õ–› «·„Õ«œÀ…">
+                <i class="bi bi-trash3-fill"></i>
+            </button>
+        </form>
+    </div>
+
+    <div class="chat-body" id="chatBody">
+        @foreach (var m in Model)
+        {
+            bool isMe = m.SenderId == (int)ViewBag.UserId;
+            <div class="message-row @(isMe ? "me" : "other")">
+                <div class="bubble">
+                    @if (!string.IsNullOrEmpty(m.ImagePath))
+                    {
+                        <img src="@m.ImagePath" class="msg-image" onclick="window.open(this.src)" />
+                    }
+                    @if (!string.IsNullOrEmpty(m.Text))
+                    {
+                        <span>@m.Text</span>
+                    }
+                    <span class="timestamp">@m.SentAt.ToString("HH:mm")</span>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="chat-footer">
+        <div id="imagePreviewContainer">
+            <button type="button" class="remove-image-btn" id="removeImageBtn"><i class="bi bi-x"></i></button>
+            <img id="imagePreview" src="" alt="Preview" />
+        </div>
+
+        <form id="chatForm" asp-action="Send" method="post" enctype="multipart/form-data" class="input-container">
+            <input type="hidden" name="requestId" value="@ViewBag.RequestId" />
+
+            <label for="imageUpload" class="file-upload-label" title="≈—›«ﬁ ’Ê—…">
+                <i class="bi bi-plus-circle"></i>
+            </label>
+            <input type="file" id="imageUpload" name="image" accept="image/*" style="display:none;" />
+
+            <input type="text" id="messageText" name="text" placeholder="«ﬂ » —”«·…..." autocomplete="off" />
+
+            <button type="submit" class="btn-send" id="sendBtn" title="≈—”«·">
+                <i class="bi bi-send-fill"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const chatBody = document.getElementById("chatBody");
+    const chatForm = document.getElementById("chatForm");
+    const imageUpload = document.getElementById("imageUpload");
+    const messageText = document.getElementById("messageText");
+    const imagePreviewContainer = document.getElementById("imagePreviewContainer");
+    const imagePreview = document.getElementById("imagePreview");
+    const removeImageBtn = document.getElementById("removeImageBtn");
+
+    function scrollToBottom() {
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+    scrollToBottom();
+
+    imageUpload.addEventListener("change", function () {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                imagePreview.src = e.target.result;
+                imagePreviewContainer.style.display = "block";
+                scrollToBottom();
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    removeImageBtn.addEventListener("click", function () {
+        imageUpload.value = "";
+        imagePreview.src = "";
+        imagePreviewContainer.style.display = "none";
+    });
+
+    chatForm.addEventListener("submit", async function (e) {
+        e.preventDefault(); 
+
+        const textVal = messageText.value.trim();
+        const fileVal = imageUpload.files.length;
+
+        if (!textVal && fileVal === 0) return;
+
+        const formData = new FormData(this);
+
+        try {
+            const response = await fetch(this.action, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+
+                messageText.value = "";
+                imageUpload.value = "";
+                imagePreviewContainer.style.display = "none";
+                imagePreview.src = "";
+                messageText.focus();
+
+
+            } else {
+                console.error("ÕœÀ Œÿ√ √À‰«¡ ≈—”«· «·—”«·…");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    });
+
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chatHub")
+        .build();
+
+    connection.on("ReceiveMessage", function (data) {
+        const userId = "@ViewBag.UserId";
+
+        const isMe = data.senderId == userId;
+
+        const row = document.createElement("div");
+        row.className = `message-row ${isMe ? 'me' : 'other'}`;
+
+        let content = `<div class="bubble">`;
+
+        if (data.imagePath) {
+            content += `<img src="${data.imagePath}" class="msg-image" onclick="window.open(this.src)" />`;
+        }
+        if (data.text) {
+            content += `<span>${data.text}</span>`;
+        }
+
+        const timeString = data.sentAt ? data.sentAt : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        content += `<span class="timestamp">${timeString}</span></div>`;
+
+        row.innerHTML = content;
+        chatBody.appendChild(row);
+        scrollToBottom();
+
+        if (!isMe) { markAsRead("@ViewBag.RequestId"); }
+    });
+
+    function markAsRead(reqId) {
+        fetch(`/Chat/MarkAsRead?requestId=${reqId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        }).catch(err => console.error(err));
+    }
+
+    connection.start().then(function () {
+        connection.invoke("JoinChat", @ViewBag.RequestId);
+    }).catch(function (err) {
+        return console.error(err.toString());
+    });
+</script>

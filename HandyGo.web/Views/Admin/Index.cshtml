@@ -1,0 +1,125 @@
+@{
+    ViewData["Title"] = "·ÊÕ… «·ﬁÌ«œ… «·—∆Ì”Ì…";
+}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark"><i class="bi bi-speedometer2 text-primary me-2"></i> ·ÊÕ… «·≈œ«—… Ê«·≈Õ’«∆Ì« </h2>
+        <span class="text-muted small"><i class="bi bi-clock me-1"></i>  „ «· ÕœÌÀ: @DateTime.Now.ToString("g")</span>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white border-start border-4 border-primary">
+                <div class="card-body">
+                    <p class="text-muted mb-1 small fw-bold text-uppercase">≈Ã„«·Ì «·⁄„·«¡</p>
+                    <h2 class="fw-bold mb-0 text-dark">@ViewBag.TotalClients <i class="bi bi-people text-primary float-end opacity-50"></i></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white border-start border-4 border-info">
+                <div class="card-body">
+                    <p class="text-muted mb-1 small fw-bold text-uppercase">≈Ã„«·Ì «·›‰ÌÌ‰</p>
+                    <h2 class="fw-bold mb-0 text-dark">@ViewBag.TotalTechnicians <i class="bi bi-tools text-info float-end opacity-50"></i></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white border-start border-4 border-success">
+                <div class="card-body">
+                    <p class="text-muted mb-1 small fw-bold text-uppercase">«·Œœ„«  «·„ﬂ „·…</p>
+                    <h2 class="fw-bold mb-0 text-dark">@ViewBag.TotalCompletedRequests <i class="bi bi-check-circle text-success float-end opacity-50"></i></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white border-start border-4 border-warning">
+                <div class="card-body">
+                    <p class="text-muted mb-1 small fw-bold text-uppercase">≈Ã„«·Ì «·√—»«Õ</p>
+                    <h2 class="fw-bold mb-0 text-dark">@ViewBag.TotalEarnings <span class="fs-6 text-muted">Ã.„</span> <i class="bi bi-wallet2 text-warning float-end opacity-50"></i></h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-5">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 pt-4 pb-0">
+                    <h6 class="fw-bold"><i class="bi bi-pie-chart text-primary me-2"></i>  Ê“Ì⁄ «·›‰ÌÌ‰ Õ”» «· Œ’’</h6>
+                </div>
+                <div class="card-body" style="position: relative; height:300px;">
+                    <canvas id="techChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 pt-4 pb-0">
+                    <h6 class="fw-bold"><i class="bi bi-bar-chart-steps text-success me-2"></i> ≈Õ’«∆Ì«  Õ«·«  «·ÿ·»« </h6>
+                </div>
+                <div class="card-body" style="position: relative; height:300px;">
+                    <canvas id="requestsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+    var ctxTech = document.getElementById('techChart').getContext('2d');
+    var techCategories = @Html.Raw(Json.Serialize(ViewBag.TechCategories));
+    var techCounts = @Html.Raw(Json.Serialize(ViewBag.TechCounts));
+
+    var techChart = new Chart(ctxTech, {
+    type: 'doughnut', 
+    data: {
+    labels: techCategories.length > 0 ? techCategories : ['·«  ÊÃœ »Ì«‰« '],
+    datasets: [{
+    data: techCounts.length > 0 ? techCounts : [1],
+    backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#0dcaf0', '#6c757d'],
+    borderWidth: 0,
+    hoverOffset: 5
+    }]
+    },
+    options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+    legend: { position: 'bottom' }
+    }
+    }
+    });
+
+    var ctxReq = document.getElementById('requestsChart').getContext('2d');
+    var requestStatuses = @Html.Raw(Json.Serialize(ViewBag.RequestStatuses));
+    var requestCounts = @Html.Raw(Json.Serialize(ViewBag.RequestCounts));
+
+    var requestsChart = new Chart(ctxReq, {
+    type: 'bar', 
+    data: {
+    labels: requestStatuses.length > 0 ? requestStatuses : ['·«  ÊÃœ »Ì«‰« '],
+    datasets: [{
+    label: '⁄œœ «·ÿ·»« ',
+    data: requestCounts.length > 0 ? requestCounts : [0],
+    backgroundColor: '#0d6efd',
+    borderRadius: 5 
+    }]
+    },
+    options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+    legend: { display: false } 
+    },
+    scales: {
+    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+    }
+    }
+    });
+</script>

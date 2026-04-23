@@ -1,0 +1,185 @@
+@model HandyGo.web.Models.User
+@using Microsoft.AspNetCore.Http
+
+<style>
+    
+    .view-profile-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        overflow: hidden;
+        max-width: 700px;
+        margin: 40px auto;
+        border: none;
+    }
+
+    .profile-banner {
+        background: linear-gradient(45deg, #4e54c8, #8f94fb);
+        height: 120px;
+    }
+
+    .profile-img-container {
+        margin-top: -70px;
+        text-align: center;
+    }
+
+    .profile-img-view {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        border: 5px solid white;
+        object-fit: cover;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .info-group {
+        padding: 10px;
+        border-bottom: 1px solid #f1f1f1;
+    }
+
+        .info-group:last-child {
+            border-bottom: none;
+        }
+
+    .label-text {
+        font-weight: 700;
+        color: #6c757d;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 2px;
+    }
+
+    .value-text {
+        color: #2d3436;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    .tech-section {
+        background-color: #f8f9ff;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+</style>
+
+<div class="container">
+    <div class="view-profile-card">
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show m-3 mb-0" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show m-3 mb-0" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="profile-banner"></div>
+
+        <div class="profile-img-container">
+            <img src="@(Model.ImagePath ?? "/images/default.png")"
+                 class="profile-img-view"
+                 alt="@Model.Name" />
+        </div>
+
+        <div class="card-body p-4 pt-2">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold mb-0">@Model.Name</h2>
+                <span class="badge bg-primary rounded-pill px-3 mt-1">@Model.Role</span>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-12 info-group">
+                    <span class="label-text"><i class="bi bi-telephone-fill me-2"></i>Phone Number</span>
+                    <span class="value-text">@(string.IsNullOrEmpty(Model.Phone) ? "Not Provided" : Model.Phone)</span>
+                </div>
+
+                @if (Model.Role == "Technician")
+                {
+                    <div class="col-12 tech-section">
+                        <h5 class="fw-bold text-primary mb-3">Professional Details</h5>
+
+                        @if (!string.IsNullOrEmpty(Model.Category))
+                        {
+                            <div class="mb-3">
+                                <span class="label-text"><i class="bi bi-briefcase-fill me-2"></i>Category</span>
+                                <div class="value-text" style="font-size: 0.95rem;">@Model.Category</div>
+                            </div>
+                        }
+
+                        <div class="mb-3">
+                            <span class="label-text"><i class="bi bi-tools me-2"></i>Skills</span>
+                            <div class="value-text" style="font-size: 0.95rem;">@(string.IsNullOrEmpty(Model.Skills) ? "No skills listed yet." : Model.Skills)</div>
+                        </div>
+
+                        <div class="mb-0">
+                            <span class="label-text"><i class="bi bi-patch-check-fill me-2"></i>Certificates</span>
+                            <div class="value-text" style="font-size: 0.95rem;">@(string.IsNullOrEmpty(Model.Certificates) ? "No certificates listed." : Model.Certificates)</div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @{
+
+                var currentUserId = Context.Session.GetInt32("UserId");
+                bool isMyProfile = (currentUserId != null && currentUserId == Model.Id);
+            }
+
+            <div class="mt-4 d-flex gap-2">
+                @if (isMyProfile)
+                {
+                    <a asp-action="Edit" class="btn btn-outline-primary w-100 rounded-pill">
+                        <i class="bi bi-pencil"></i> Edit Profile
+                    </a>
+                }
+                else if (currentUserId != null && Context.Session.GetString("UserRole") != "Admin")
+                {
+                    <button type="button" class="btn btn-outline-danger w-100 rounded-pill" data-bs-toggle="modal" data-bs-target="#reportModal">
+                        <i class="bi bi-flag"></i> Report User
+                    </button>
+                }
+
+                <button onclick="history.back()" class="btn btn-light w-100 rounded-pill border">
+                    <i class="bi bi-arrow-left me-1"></i> Go Back
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!isMyProfile && Context.Session.GetInt32("UserId") != null)
+{
+    <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form asp-controller="Profile" asp-action="SubmitReport" method="post">
+                    <input type="hidden" name="reportedUserId" value="@Model.Id" />
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="reportModalLabel"><i class="bi bi-exclamation-triangle me-2"></i>Report @Model.Name</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="small text-muted">Please provide a reason for reporting this user. Admin will review your report shortly.</p>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Reason for reporting</label>
+                            <textarea name="reason" class="form-control" rows="4" placeholder="Describe the issue..." required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Submit Report</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}

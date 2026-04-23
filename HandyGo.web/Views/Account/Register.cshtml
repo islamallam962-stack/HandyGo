@@ -1,0 +1,320 @@
+@model HandyGo.web.ViewModels.RegisterViewModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Register - HandyGo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+            :root {
+                --primary-color: #0d6efd;
+                --dark-color: #1a202c;
+                --accent-color: #f59e0b;
+            }
+
+            html, body {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                width: 100%;
+                overflow: hidden;
+                overscroll-behavior: none;
+            }
+
+            body {
+                background: url('https://images.unsplash.com/photo-1505798577917-a65157d3320a?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed;
+                background-size: cover;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: 'Inter', sans-serif;
+                position: relative;
+            }
+
+                body::before {
+                    content: "";
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(13,110,253,0.3) 100%);
+                    z-index: 1;
+                }
+
+            .register-container {
+                position: relative;
+                z-index: 2;
+                width: 100%;
+                max-width: 500px;
+                padding: 20px;
+                max-height: 95vh;
+                overflow-y: auto;
+                scrollbar-width: none;
+            }
+
+                .register-container::-webkit-scrollbar {
+                    display: none;
+                }
+
+            .register-card {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 30px;
+                padding: 40px 30px;
+                box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+                border: 1px solid rgba(255,255,255,0.3);
+            }
+
+            .brand-icon {
+                width: 65px;
+                height: 65px;
+                background: var(--primary-color);
+                color: white;
+                border-radius: 20px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.8rem;
+                margin-bottom: 20px;
+                box-shadow: 0 10px 20px rgba(13,110,253,0.3);
+            }
+
+            .register-header h2 {
+                font-weight: 800;
+                color: var(--dark-color);
+                margin-bottom: 8px;
+                letter-spacing: -0.5px;
+            }
+
+            .register-header p {
+                font-size: 0.95rem;
+                color: #64748b;
+                margin-bottom: 30px;
+            }
+
+            .form-floating {
+                margin-bottom: 12px;
+            }
+
+                .form-floating > .form-control {
+                    border-radius: 15px;
+                    border: 1px solid #e2e8f0;
+                    background: #f8fafc;
+                    height: 58px;
+                    font-size: 0.95rem;
+                    transition: all 0.2s ease-in-out;
+                }
+
+                    .form-floating > .form-control:focus {
+                        background: #fff;
+                        border-color: var(--primary-color);
+                        box-shadow: 0 0 0 4px rgba(13,110,253,0.1);
+                    }
+
+            .text-danger {
+                font-size: 0.78rem;
+                font-weight: 600;
+                margin-top: 5px;
+                display: block;
+                text-align: left;
+            }
+
+            .btn-register {
+                background: var(--dark-color);
+                color: white;
+                border: none;
+                height: 55px;
+                border-radius: 15px;
+                font-weight: 700;
+                font-size: 1.1rem;
+                transition: all 0.3s ease;
+                margin-top: 10px;
+            }
+
+                .btn-register:hover {
+                    background: #000;
+                    transform: translateY(-2px);
+                    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+                }
+
+            .divider {
+                display: flex;
+                align-items: center;
+                margin: 25px 0;
+                color: #94a3b8;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                font-weight: 600;
+            }
+
+                .divider::before, .divider::after {
+                    content: '';
+                    flex: 1;
+                    border-bottom: 1px solid #e2e8f0;
+                }
+
+                .divider span {
+                    padding: 0 15px;
+                }
+
+            .btn-google {
+                border: 1px solid #e2e8f0;
+                height: 52px;
+                border-radius: 15px;
+                font-weight: 600;
+                color: #475569;
+                background: white;
+                transition: 0.3s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                text-decoration: none;
+            }
+
+                .btn-google:hover {
+                    background: #f8fafc;
+                    transform: translateY(-2px);
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+                    color: #1e293b;
+                }
+
+            .login-link {
+                color: var(--primary-color);
+                font-weight: 700;
+                text-decoration: none;
+            }
+
+                .login-link:hover {
+                    text-decoration: underline;
+                }
+
+            .referral-icon {
+                color: var(--accent-color);
+            }
+    </style>
+</head>
+<body>
+
+    <div class="register-container">
+        <div class="register-card text-center">
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4 text-start" role="alert" style="border-radius: 15px; font-size: 0.85rem;">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="brand-icon">
+                <i class="bi bi-person-plus-fill"></i>
+            </div>
+
+            <div class="register-header">
+                <h2>Create Account</h2>
+                <p>Join HandyGo community today</p>
+            </div>
+
+            <form asp-action="Register" asp-controller="Account" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3 text-center"></div>
+
+                <input type="hidden" asp-for="Role" value="Client" />
+
+                <div class="row g-3">
+                    <div class="col-12 text-start">
+                        <div class="form-floating">
+                            <input asp-for="Name" class="form-control" placeholder="Full Name">
+                                <label asp-for="Name"><i class="bi bi-person me-2"></i>Full Name</label>
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 text-start">
+                            <div class="form-floating">
+                                <input asp-for="Email" class="form-control" placeholder="Email">
+                                    <label asp-for="Email"><i class="bi bi-envelope me-2"></i>Email address</label>
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 text-start">
+                                <div class="form-floating">
+                                    <input asp-for="Phone" class="form-control" placeholder="Phone">
+                                        <label asp-for="Phone"><i class="bi bi-phone me-2"></i>Phone</label>
+                                        <span asp-validation-for="Phone" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 text-start">
+                                    <div class="form-floating">
+                                        <input asp-for="Password" type="password" class="form-control" placeholder="Password">
+                                            <label asp-for="Password"><i class="bi bi-shield-lock me-2"></i>Password</label>
+                                            <span asp-validation-for="Password" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 text-start">
+                                        <div class="form-floating">
+                                            
+                                            <input asp-for="ReferralCodeInput" class="form-control text-uppercase" placeholder="Referral Code">
+                                                <label asp-for="ReferralCodeInput"><i class="bi bi-gift-fill referral-icon me-2"></i>Referral Code (Optional)</label>
+                                                <span asp-validation-for="ReferralCodeInput" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-register w-100 shadow-sm mt-3">
+                                        Sign Up <i class="bi bi-arrow-right-short ms-1"></i>
+                                    </button>
+
+                                    <div class="divider">
+                                        <span>Or connect with</span>
+                                    </div>
+
+                                    <a asp-action="ExternalLogin" asp-controller="Account" class="btn-google w-100">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20px" height="20px">
+                                            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+                                            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                                            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+                                            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+                                        </svg>
+                                        Continue with Google
+                                    </a>
+
+                                    <div class="mt-4">
+                                        <p class="small text-muted mb-0">
+                                            Already have an account?
+                                            <a asp-action="Login" class="login-link ms-1">Sign In</a>
+                                        </p>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+                        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
+                        
+                        <script>
+                            if ('serviceWorker' in navigator) {
+                            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                            for(let registration of registrations) {
+                            registration.unregister();
+                            }
+                            });
+                            }
+                        </script>
+                    </body>
+                </html>

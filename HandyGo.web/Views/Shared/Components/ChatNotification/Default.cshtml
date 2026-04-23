@@ -1,0 +1,18 @@
+@model int
+
+<div class="position-relative d-inline-block">
+    <i class="bi bi-bell fs-4 text-dark"></i>
+
+    @if (Model > 0)
+    {
+        <span class="badge rounded-pill bg-danger" 
+              style="position: absolute; 
+                     top: -5px; 
+                     right: -10px; 
+                     font-size: 0.65rem; 
+                     padding: 0.35em 0.5em;
+                     min-width: 18px;">
+            @(Model > 99 ? "+99" : Model.ToString())
+        </span>
+    }
+</div>

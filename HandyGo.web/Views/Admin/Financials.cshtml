@@ -1,0 +1,184 @@
+@model List<HandyGo.web.Models.WithdrawalRequest>
+@{
+    ViewData["Title"] = "«··ÊÕ… «·„«·Ì… ··„«·ﬂ";
+}
+
+<div class="container py-5">
+    
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success shadow-sm rounded-4 mb-4"><i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]</div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark"><i class="bi bi-bank2 text-primary me-2"></i> «·Œ“Ì‰… Ê«·≈œ«—… «·„«·Ì…</h2>
+        <a asp-controller="Admin" asp-action="Users" class="btn btn-outline-secondary rounded-pill px-4">⁄Êœ… ·≈œ«—… «·„” Œœ„Ì‰</a>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark text-white border-0 shadow-lg rounded-4 overflow-hidden position-relative">
+                <div class="card-body p-5 position-relative text-center" style="z-index: 2;">
+                    <p class="mb-2 text-white-50 fw-bold text-uppercase fs-5">«·—’Ìœ «·›⁄·Ì ›Ì «·Õ”«» «·»‰ﬂÌ (Paymob)</p>
+                    <h1 class="display-3 fw-bold mb-0 text-info">@ViewBag.ActualBankBalance <span class="fs-4 text-white">Ã.„</span></h1>
+                    <hr class="border-white opacity-25 w-50 mx-auto my-3">
+                    <p class="mb-0 small"><i class="bi bi-info-circle-fill text-info me-1"></i> Â–« «·—ﬁ„ Ì„À· «·”ÌÊ·… «·‰ﬁœÌ… «·ÕﬁÌﬁÌ… «·„ÊÃÊœ… ›Ì Õ”«»ﬂ «·»‰ﬂÌ «·¬‰ („Ã„Ê⁄ «·’‰«œÌﬁ «·À·«À… »«·√”›· + „Õ«›Ÿ «·⁄„·«¡).</p>
+                </div>
+                <i class="bi bi-bank position-absolute text-white opacity-10" style="font-size: 15rem; left: -20px; bottom: -40px; z-index: 1;"></i>
+                <i class="bi bi-credit-card position-absolute text-white opacity-10" style="font-size: 10rem; right: -20px; top: -20px; z-index: 1;"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5 g-4">
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="card bg-success text-white border-0 shadow rounded-4 h-100 overflow-hidden position-relative">
+                <div class="card-body p-4 position-relative" style="z-index: 2;">
+                    <p class="mb-1 text-white-50 fw-bold small text-uppercase">√—»«Õ «·„‰’… (⁄„Ê·« ﬂ)</p>
+                    <h2 class="fw-bold mb-0">@ViewBag.TotalEarnings <span class="fs-6">Ã.„</span></h2>
+                    <hr class="border-white opacity-25 my-2">
+                    <p class="mb-0" style="font-size: 0.75rem;"><i class="bi bi-arrow-up-circle-fill text-white"></i> ›·Ê”ﬂ «·Œ«’….  “Ìœ »«‰ Â«¡ «·⁄„· Ê·«  ‰ﬁ’.</p>
+                </div>
+                <i class="bi bi-cash-stack position-absolute text-white opacity-25" style="font-size: 6rem; right: -15px; bottom: -15px; z-index: 1;"></i>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card bg-warning text-dark border-0 shadow rounded-4 h-100 overflow-hidden position-relative">
+                <div class="card-body p-4 position-relative" style="z-index: 2;">
+                    <p class="mb-1 text-dark-50 fw-bold small text-uppercase opacity-75">√„Ê«· „⁄·ﬁ… (Escrow)</p>
+                    <h2 class="fw-bold mb-0">@ViewBag.EscrowMoney <span class="fs-6">Ã.„</span></h2>
+                    <hr class="border-dark opacity-25 my-2">
+                    <p class="mb-0" style="font-size: 0.75rem;"><i class="bi bi-info-circle-fill text-dark"></i>  “Ìœ »œ›⁄ «·⁄„Ì·° Ê  Ê“⁄ »«‰ Â«¡ «·⁄„·.</p>
+                </div>
+                <i class="bi bi-safe position-absolute text-dark opacity-10" style="font-size: 6rem; right: -15px; bottom: -15px; z-index: 1;"></i>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card bg-primary text-white border-0 shadow rounded-4 h-100 overflow-hidden position-relative">
+                <div class="card-body p-4 position-relative" style="z-index: 2;">
+                    <p class="mb-1 text-white-50 fw-bold small text-uppercase">„” Õﬁ«  «·›‰ÌÌ‰ (œÌÊ‰)</p>
+                    <h2 class="fw-bold mb-0">@ViewBag.TechniciansBalance <span class="fs-6">Ã.„</span></h2>
+                    <hr class="border-white opacity-25 my-2">
+                    <p class="mb-0" style="font-size: 0.75rem;"><i class="bi bi-arrow-down-circle-fill text-white"></i>  ‰ﬁ’ ⁄‰œ„«  ”œœ ·Â„ √—»«ÕÂ„ ··Ìœ.</p>
+                </div>
+                <i class="bi bi-wallet2 position-absolute text-white opacity-25" style="font-size: 6rem; right: -15px; bottom: -15px; z-index: 1;"></i>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card bg-secondary text-white border-0 shadow rounded-4 h-100 overflow-hidden position-relative">
+                <div class="card-body p-4 position-relative" style="z-index: 2;">
+                    <p class="mb-1 text-white-50 fw-bold small text-uppercase">≈Ã„«·Ì „«  „  ÕÊÌ·Â</p>
+                    <h2 class="fw-bold mb-0">@ViewBag.TotalPayouts <span class="fs-6">Ã.„</span></h2>
+                    <hr class="border-white opacity-25 my-2">
+                    <p class="mb-0" style="font-size: 0.75rem;"><i class="bi bi-check-circle-fill text-white"></i> √—ﬁ«„ Œ—Ã  „‰ «·»‰ﬂ ·Õ”«»«  «·›‰ÌÌ‰.</p>
+                </div>
+                <i class="bi bi-send-check position-absolute text-white opacity-25" style="font-size: 6rem; right: -15px; bottom: -15px; z-index: 1;"></i>
+            </div>
+        </div>
+
+    </div>
+
+    <h4 class="fw-bold mb-3"><i class="bi bi-box-arrow-up-right me-2"></i> ÿ·»«  «·”Õ» «·„⁄·ﬁ… ( ··›‰ÌÌ‰ )</h4>
+    
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-body p-0">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="py-3 px-4">«·›‰Ì</th>
+                                <th class="py-3">«·„»·€ «·„ÿ·Ê»</th>
+                                <th class="py-3">Ê”Ì·… «·”Õ»</th>
+                                <th class="py-3">«· ›«’Ì· / «·—ﬁ„</th>
+                                <th class="py-3">«· «—ÌŒ</th>
+                                <th class="py-3 text-center">«·≈Ã—«¡</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="px-4">
+                                        <div class="d-flex align-items-center">
+                                            <img src="@(item.Technician.ImagePath ?? "/images/default.png")" class="rounded-circle me-2" width="40" height="40" style="object-fit:cover;">
+                                            <span class="fw-bold text-primary">@item.Technician.Name</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-success fs-6">@item.Amount Ã.„</span></td>
+                                    <td>
+                                        @if (item.Method == "VodafoneCash")
+                                        {
+                                            <span class="text-danger fw-bold"><i class="bi bi-phone me-1"></i>›Êœ«›Ê‰ ﬂ«‘</span>
+                                        }
+                                        else if (item.Method == "InstaPay")
+                                        {
+
+                                            <span class="text-primary fw-bold">InstaPay</span>
+                                        }
+                                        else
+                                        {
+
+                                            <span class="text-secondary fw-bold"><i class="bi bi-bank me-1"></i> ÕÊÌ· »‰ﬂÌ</span>
+                                        }
+                                    </td>
+                                    <td class="fw-bold">@item.Details</td>
+                                    <td class="text-muted small">@item.CreatedAt.ToString("g")</td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <form asp-action="ApproveWithdrawal" method="post" onsubmit="return confirm(' √ﬂÌœ: Â· ﬁ„  »› Õ ›Êœ«›Ê‰ ﬂ«‘/≈‰” «»«Ì «·Œ«’ »ﬂ Ê ÕÊÌ· «·„»·€ ··›‰Ì »«·›⁄·ø (”Ì „  ﬁ·Ì· «·—’Ìœ «·»‰ﬂÌ «·¬‰)');">
+                                                <input type="hidden" name="id" value="@item.Id" />
+                                                <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm"><i class="bi bi-check-lg me-1"></i>  „ «· ÕÊÌ·</button>
+                                            </form>
+
+                                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#rejectModal-@item.Id">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <div class="modal fade" id="rejectModal-@item.Id" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content border-0 shadow rounded-4">
+                                            <div class="modal-header bg-danger text-white border-0 rounded-top-4">
+                                                <h5 class="modal-title fw-bold">—›÷ ÿ·» «·”Õ»</h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <form asp-action="RejectWithdrawal" method="post">
+                                                <div class="modal-body p-4">
+                                                    <input type="hidden" name="id" value="@item.Id" />
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">”»» «·—›÷ (”ÌŸÂ— ··›‰Ì):</label>
+                                                        <input type="text" name="reason" class="form-control" required placeholder="„À«·: —ﬁ„ «·Õ”«» €Ì— ’ÕÌÕ" />
+                                                    </div>
+                                                    <div class="alert alert-warning small mb-0"><i class="bi bi-info-circle me-1"></i> ”Ì „ ≈⁄«œ… „»·€ @item.Amount Ã.„ ≈·Ï „Õ›Ÿ… «·›‰Ì (·«  √ÀÌ— ⁄·Ï «·—’Ìœ «·»‰ﬂÌ).</div>
+                                                </div>
+                                                <div class="modal-footer border-0 bg-light rounded-bottom-4">
+                                                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">≈·€«¡</button>
+                                                    <button type="submit" class="btn btn-danger fw-bold rounded-pill"> √ﬂÌœ «·—›÷</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center p-5">
+                    <i class="bi bi-check2-all text-success" style="font-size: 4rem;"></i>
+                    <h5 class="mt-3 fw-bold text-muted">·«  ÊÃœ ÿ·»«  ”Õ» „⁄·ﬁ… Õ«·Ì«</h5>
+                </div>
+            }
+        </div>
+    </div>
+</div>

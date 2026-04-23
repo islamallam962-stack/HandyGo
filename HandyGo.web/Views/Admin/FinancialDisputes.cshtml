@@ -1,0 +1,128 @@
+@model List<HandyGo.web.Models.FinancialDispute>
+@{
+    ViewData["Title"] = "≈œ«—… «·‰“«⁄«  «·„«·Ì…";
+}
+
+<div class="container py-5">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success shadow-sm rounded-4 mb-4"><i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]</div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1"><i class="bi bi-cash-stack text-danger me-2"></i> «·‰“«⁄«  «·„«·Ì… Ê«·√„Ê«· «·„Ã„œ…</h2>
+            <p class="text-muted mb-0 small">«›’· ›Ì «·‰“«⁄«  «·„«·Ì… ·≈—Ã«⁄ «·√„Ê«· ··⁄„Ì· √Ê  ÕÊÌ·Â« ··›‰Ì.</p>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-body p-0">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-muted small text-uppercase">
+                            <tr>
+                                <th class="py-3 px-4">«·ÿ·»</th>
+                                <th class="py-3">„ıﬁœ„ «·‰“«⁄</th>
+                                <th class="py-3">«·„»·€ «·„ıÃ„œ</th>
+                                <th class="py-3">«·”»» Ê«· ›«’Ì·</th>
+                                <th class="py-3 text-center">«·ﬁ—«—</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var dispute in Model)
+                            {
+                                bool isOpen = dispute.Status == "Open";
+                                decimal frozenAmount = (dispute.Request.NetToTechnician ?? 0) + (dispute.Request.PlatformCommission ?? 0);
+
+                                <tr>
+                                    <td class="px-4 fw-bold text-primary">REQ-#@dispute.RequestId</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="@(dispute.InitiatorUser.ImagePath ?? "/images/default.png")" class="rounded-circle me-2" width="35" height="35" style="object-fit:cover;">
+                                            <div>
+                                                <h6 class="mb-0 fw-bold small">@dispute.InitiatorUser.Name</h6>
+                                                <small class="text-muted" style="font-size: 11px;">@dispute.InitiatorUser.Role</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger px-3 py-2 rounded-pill fs-6"><i class="bi bi-lock-fill me-1"></i> @frozenAmount Ã.„</span>
+                                    </td>
+                                    <td>
+                                        <h6 class="fw-bold mb-0 text-dark small">@dispute.Reason</h6>
+                                        <small class="text-muted d-block text-truncate" style="max-width: 200px;" title="@dispute.Details">@dispute.Details</small>
+                                    </td>
+                                    <td class="text-center">
+                                        @if (isOpen)
+                                        {
+                                            <button class="btn btn-sm btn-dark rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#resolveModal-@dispute.Id">
+                                                ≈’œ«— «·Õıﬂ„
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            @if (dispute.Status == "RefundedToClient")
+                                            {
+                                                <span class="badge bg-secondary px-3 py-2 rounded-pill"><i class="bi bi-arrow-return-left me-1"></i> —ıœ  ··⁄„Ì·</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success px-3 py-2 rounded-pill"><i class="bi bi-check-lg me-1"></i> ÕıÊ·  ··›‰Ì</span>
+                                            }
+                                        }
+                                    </td>
+                                </tr>
+
+                                <div class="modal fade" id="resolveModal-@dispute.Id" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content border-0 shadow rounded-4">
+                                            <div class="modal-header bg-dark text-white border-0">
+                                                <h5 class="modal-title fw-bold"><i class="bi bi-hammer me-2"></i> ≈’œ«— «·Õﬂ„ «·„«·Ì</h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <form asp-action="ResolveFinancialDispute" method="post">
+                                                <div class="modal-body p-4 bg-light">
+                                                    <input type="hidden" name="disputeId" value="@dispute.Id" />
+                                                    
+                                                    <div class="bg-white p-3 rounded-3 shadow-sm mb-4 border-start border-4 border-danger">
+                                                        <h6 class="fw-bold text-dark">”»» «·‰“«⁄: @dispute.Reason</h6>
+                                                        <p class="small text-muted mb-0">@dispute.Details</p>
+                                                    </div>
+
+                                                    <label class="form-label fw-bold">«·ﬁ—«— «·„«·Ì «·‰Â«∆Ì:</label>
+                                                    <select name="decision" class="form-select mb-3" required>
+                                                        <option value="">-- «Œ — «·ﬁ—«— ·Õ”„ «·„»·€ «·„Ã„œ --</option>
+                                                        <option value="RefundClient">≈·€«¡ «·ÿ·» Ê≈—Ã«⁄ @frozenAmount Ã.„ ·„Õ›Ÿ… «·⁄„Ì·</option>
+                                                        <option value="PayTechnician">«ﬂ „«· «·ÿ·» Ê ÕÊÌ· @(dispute.Request.NetToTechnician) Ã.„ ·„Õ›Ÿ… «·›‰Ì</option>
+                                                    </select>
+
+                                                    <label class="form-label fw-bold">„·«ÕŸ… «·≈œ«—… (” ŸÂ— ··ÿ—›Ì‰):</label>
+                                                    <textarea name="adminNote" class="form-control" rows="2" required placeholder="”»» «·ﬁ—«— «· ÕﬂÌ„Ì..."></textarea>
+                                                </div>
+                                                <div class="modal-footer border-0">
+                                                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">≈·€«¡</button>
+                                                    <button type="submit" class="btn btn-danger fw-bold rounded-pill px-4"> ‰›Ì– «·ﬁ—«— «·„«·Ì</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center p-5">
+                    <i class="bi bi-shield-check text-success opacity-50" style="font-size: 5rem;"></i>
+                    <h5 class="mt-3 fw-bold text-muted">·«  ÊÃœ √„Ê«· „ ‰«“⁄ ⁄·ÌÂ«</h5>
+                    <p class="text-muted small">ﬂ· «·⁄„·Ì«  «·„«·Ì…  ”Ì— »√„«‰.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

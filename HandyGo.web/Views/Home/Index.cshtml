@@ -1,0 +1,190 @@
+@{
+    ViewData["Title"] = "Welcome to HandyGo";
+    var userId = Context.Session.GetInt32("UserId");
+}
+
+<style>
+    
+    .hero-section {
+        background: linear-gradient(135deg, #0d6efd 0%, #004dbd 100%);
+        padding: 80px 0 120px 0;
+        border-radius: 0 0 40px 40px;
+        color: white;
+        margin-top: -24px;
+        position: relative;
+    }
+
+    .hero-title {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 15px;
+    }
+
+    .hero-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 30px;
+        max-width: 600px;
+    }
+
+    
+    .stats-bar {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        margin-top: -60px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        position: relative;
+        z-index: 10;
+    }
+
+    
+    .service-mini-card {
+        background: white;
+        border-radius: 20px;
+        padding: 35px 25px;
+        text-align: center;
+        transition: all 0.3s ease;
+        border: 1px solid #f0f0f0;
+        height: 100%;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.02);
+    }
+
+        .service-mini-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+            border-color: #0d6efd;
+        }
+
+    .service-icon {
+        font-size: 3rem;
+        color: #0d6efd;
+        margin-bottom: 20px;
+        display: block;
+    }
+
+    
+    .about-box {
+        background: #fdfdfd;
+        border-radius: 25px;
+        padding: 40px;
+        border: 1px dashed #ccc;
+    }
+
+    .btn-rounded {
+        border-radius: 50px;
+        padding: 10px 30px;
+        font-weight: 600;
+    }
+</style>
+
+<section class="hero-section text-center">
+    <div class="container">
+        <h1 class="hero-title">Expert Help, Just a Click Away</h1>
+        <p class="hero-subtitle mx-auto">Connecting you with the best professional technicians in Egypt for home maintenance and smart solutions.</p>
+        <div class="d-flex gap-3 justify-content-center">
+            @if (userId == null)
+            {
+                <a asp-controller="Account" asp-action="Register" class="btn btn-light btn-rounded text-primary shadow">Get Started</a>
+                <a href="#services" class="btn btn-outline-light btn-rounded">View Services</a>
+            }
+            else
+            {
+                <a asp-controller="Profile" asp-action="Index" class="btn btn-light btn-rounded text-primary shadow">My Dashboard</a>
+            }
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <div class="stats-bar">
+        <div class="row text-center g-3">
+            <div class="col-4 border-end">
+                <h4 class="fw-bold text-primary mb-0">5K+</h4>
+                <small class="text-muted">Technicians</small>
+            </div>
+            <div class="col-4 border-end">
+                <h4 class="fw-bold text-primary mb-0">12K+</h4>
+                <small class="text-muted">Jobs Done</small>
+            </div>
+            <div class="col-4">
+                <h4 class="fw-bold text-primary mb-0">4.9/5</h4>
+                <small class="text-muted">Rating</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="container py-5" id="services">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold">Our Core Services</h2>
+        <p class="text-muted">Whatever you need, we have a professional for it.</p>
+    </div>
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-4 col-sm-6">
+            <div class="service-mini-card">
+                <i class="bi bi-lightning-charge service-icon"></i>
+                <h5 class="fw-bold">Electricity</h5>
+                <p class="small text-muted">Complete home wiring, lighting repairs, and electrical safety checks by certified experts.</p>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-6">
+            <div class="service-mini-card">
+                <i class="bi bi-droplet service-icon"></i>
+                <h5 class="fw-bold">Plumbing</h5>
+                <p class="small text-muted">Fixing leaks, installing pipes, and bathroom renovations with high-quality materials.</p>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-6">
+            <div class="service-mini-card">
+                <i class="bi bi-snow service-icon"></i>
+                <h5 class="fw-bold">AC Services</h5>
+                <p class="small text-muted">Professional cleaning, maintenance, and gas refills to keep your home cool.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container py-5 mb-4">
+    <div class="row g-4">
+        <div class="col-lg-6" id="about">
+            <div class="about-box h-100">
+                <h3 class="fw-bold mb-3">Why HandyGo?</h3>
+                <p class="text-muted">HandyGo is Egypt's leading platform for home services. We ensure every technician is verified, every job is insured, and every client is satisfied.</p>
+                <ul class="list-unstyled text-muted small">
+                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i> Verified Professionals</li>
+                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i> Fixed & Fair Pricing</li>
+                    <li><i class="bi bi-check-circle-fill text-primary me-2"></i> 24/7 Customer Support</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-6" id="help">
+            <div class="card border-0 bg-primary text-white p-4 h-100 rounded-4 shadow-sm">
+                <h3 class="fw-bold mb-3">Need Help?</h3>
+                <p class="opacity-75">Our support team is ready to assist you with any questions or issues you might face.</p>
+                <div class="mt-auto">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-telephone-fill me-2"></i>
+                        <span>+20 123 456 789</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-envelope-fill me-2"></i>
+                        <span>support@handygo.com</span>
+                    </div>
+                    <button class="btn btn-light btn-sm rounded-pill px-4 fw-bold">Chat with us</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@if (userId == null)
+{
+    <section class="container mb-5">
+        <div class="p-5 text-center bg-dark text-white rounded-4 shadow-sm">
+            <h3 class="fw-bold">Join HandyGo Today</h3>
+            <p class="opacity-75 mb-4">Register now and get your first service with a 10% discount.</p>
+            <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-rounded px-5">Sign Up Now</a>
+        </div>
+    </section>
+}

@@ -1,0 +1,234 @@
+@model List<HandyGo.web.Models.Request>
+
+<style>
+    body {
+        background-color: #f8faff;
+    }
+
+    .page-header {
+        background: white;
+        padding: 25px 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        margin-bottom: 30px;
+        border-left: 5px solid #007bff;
+    }
+
+    .request-card {
+        background: white;
+        border: 1px solid #edf2f7;
+        border-radius: 15px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .request-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.08) !important;
+            border-color: #cce3ff;
+        }
+
+        .request-card::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 6px;
+            background: linear-gradient(180deg, #007bff 0%, #00d2ff 100%);
+            border-radius: 15px 0 0 15px;
+        }
+
+    .client-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #fff;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .btn-action {
+        border-radius: 50rem;
+        font-weight: bold;
+        padding: 8px 20px;
+        transition: all 0.3s;
+    }
+
+        .btn-action:hover {
+            transform: scale(1.02);
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 20px;
+        border: 2px dashed #cbd5e1;
+    }
+</style>
+
+<div class="container py-4">
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4 rounded-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4 rounded-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold mb-1 text-dark">
+                <i class="bi bi-envelope-paper text-primary me-2"></i>Incoming Requests
+            </h2>
+            <p class="text-muted mb-0 small">Manage your direct service requests from clients</p>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-4 py-2 fs-6">
+                <i class="bi bi-inbox-fill me-1"></i> Total: @Model.Count
+            </span>
+            <a asp-controller="Profile" asp-action="Index" class="btn btn-outline-dark btn-sm rounded-pill px-4 py-2 fw-bold shadow-sm">
+                <i class="bi bi-arrow-left me-1"></i> Back to Profile
+            </a>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-state shadow-sm">
+            <div class="d-inline-flex justify-content-center align-items-center bg-light rounded-circle mb-3" style="width: 100px; height: 100px;">
+                <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+            </div>
+            <h4 class="fw-bold text-dark">No Requests Yet</h4>
+            <p class="text-muted">When clients request your services directly, they will appear here.</p>
+        </div>
+    }
+
+    <div class="row g-4">
+        @foreach (var r in Model)
+        {
+            <div class="col-12">
+                <div class="card request-card shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+
+                            <div class="col-lg-4 col-md-6 mb-3 mb-lg-0 border-end-lg border-light">
+                                <div class="d-flex align-items-center">
+                                    <a asp-controller="Profile" asp-action="Details" asp-route-id="@r.ClientId">
+                                        <img src="@(string.IsNullOrEmpty(r.Client.ImagePath) ? "/images/default.png" : r.Client.ImagePath)"
+                                             class="client-avatar me-3" alt="@r.Client.Name">
+                                    </a>
+                                    <div>
+                                        <h5 class="mb-1 fw-bold">
+                                            <a asp-controller="Profile" asp-action="Details" asp-route-id="@r.ClientId"
+                                                   class="text-decoration-none text-dark hover-primary">
+                                                @r.Client.Name
+                                            </a>
+                                        </h5>
+                                        <div class="text-muted small">
+                                            <span class="badge bg-light text-secondary border rounded-pill mb-1">Client</span><br />
+                                            <i class="bi bi-calendar3 me-1"></i> @r.CreatedAt.ToString("MMM dd, yyyy")
+                                            <span class="mx-1 text-light">|</span>
+                                            <i class="bi bi-clock me-1"></i> @r.CreatedAt.ToString("hh:mm tt")
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4 col-md-6 mb-3 mb-lg-0 border-end-lg border-light ps-lg-4">
+                                <div class="mb-3">
+                                    <small class="text-uppercase fw-bold text-muted" style="font-size: 11px; letter-spacing: 1px;">Requested Service</small>
+                                    <h5 class="fw-bold text-primary mb-0 mt-1"><i class="bi bi-tools me-2"></i>@r.ServiceType</h5>
+                                </div>
+                                <div>
+                                    <small class="text-uppercase fw-bold text-muted" style="font-size: 11px; letter-spacing: 1px;">Location</small>
+                                    <p class="text-dark mb-0 fw-medium mt-1"><i class="bi bi-geo-alt-fill text-danger me-1"></i> @r.Address</p>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4 text-lg-end ps-lg-4">
+                                <div class="d-flex flex-column gap-2">
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-success btn-action flex-grow-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#acceptModal-@r.Id">
+                                            <i class="bi bi-send-check me-1"></i> Send Bid
+                                        </button>
+
+                                        <form asp-action="Reject" method="post" class="flex-grow-1" onsubmit="return confirm('Are you sure you want to reject this request?');">
+                                            <input type="hidden" name="id" value="@r.Id" />
+                                            <button type="submit" class="btn btn-outline-danger btn-action w-100">
+                                                <i class="bi bi-x-lg"></i> Reject
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <a href="/Chat/Index?requestId=@r.Id" class="btn btn-light border btn-action shadow-sm text-primary">
+                                        <i class="bi bi-chat-dots-fill me-2"></i> Discuss Details
+                                    </a>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="acceptModal-@r.Id" tabindex="-1" aria-labelledby="acceptModalLabel-@r.Id" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                        
+                        <div class="modal-header bg-success text-white border-0 p-4">
+                            <h5 class="modal-title fw-bold" id="acceptModalLabel-@r.Id">
+                                <i class="bi bi-currency-dollar me-2"></i>Set Service Cost
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        
+                        <form asp-action="Accept" method="post">
+                            <div class="modal-body p-4 bg-light">
+                                <input type="hidden" name="id" value="@r.Id" />
+                                
+                                <div class="alert alert-info small mb-4 border-0 shadow-sm rounded-3">
+                                    <i class="bi bi-info-circle-fill me-2 text-info fs-5 float-start"></i>
+                                    The client is waiting for your price. Send a preliminary bid to start the negotiation and payment process.
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold text-dark">Proposed Price (EGP) <span class="text-danger">*</span></label>
+                                    <div class="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
+                                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-cash text-success fs-4"></i></span>
+                                        <input type="number" name="price" class="form-control border-start-0 ps-0 fw-bold fs-5" min="10" step="1" required placeholder="e.g. 150">
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-dark">Estimated Time <span class="text-danger">*</span></label>
+                                    <div class="input-group shadow-sm rounded-3 overflow-hidden">
+                                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-clock-history text-primary"></i></span>
+                                        <input type="text" name="estimatedTime" class="form-control border-start-0 ps-0" required placeholder="e.g. 2 hours, or 1 day">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="modal-footer bg-white border-0 p-3">
+                                <button type="button" class="btn btn-light border rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-success fw-bold rounded-pill px-4 shadow-sm">
+                                    Send Bid to Client <i class="bi bi-send-fill ms-2"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

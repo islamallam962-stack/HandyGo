@@ -1,0 +1,227 @@
+@model List<HandyGo.web.ViewModels.ChatInboxVM>
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .inbox-container {
+        max-width: 800px;
+        margin: 40px auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .inbox-header {
+        background: #fff;
+        padding: 20px 25px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    
+    .chat-wrapper-item {
+        position: relative;
+        border-bottom: 1px solid #f8f9fa;
+        transition: all 0.2s ease;
+    }
+
+        .chat-wrapper-item:hover {
+            background-color: #f8faff;
+        }
+
+        .chat-wrapper-item.unread {
+            background-color: #f0f7ff;
+        }
+
+            .chat-wrapper-item.unread::after {
+                content: "";
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 4px;
+                background-color: #007bff;
+            }
+
+    .chat-item-link {
+        padding: 15px 25px;
+        display: flex;
+        align-items: center;
+        text-decoration: none !important;
+        color: inherit !important;
+        width: 100%; 
+    }
+
+    .user-avatar {
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .chat-info {
+        flex-grow: 1;
+        margin-left: 15px;
+        overflow: hidden;
+        padding-right: 40px; 
+    }
+
+    .chat-name {
+        font-weight: 700;
+        font-size: 1.05rem;
+        margin-bottom: 2px;
+        color: #2d3748;
+    }
+
+    .last-msg {
+        color: #718096;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 400px;
+    }
+
+    .chat-meta {
+        text-align: right;
+        min-width: 100px;
+        margin-right: 35px; 
+    }
+
+    .status-pill {
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        border-radius: 10px;
+        background: #edf2f7;
+        color: #4a5568;
+    }
+
+    .unread-badge {
+        background: #007bff;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: bold;
+        margin-top: 5px;
+    }
+
+    .delete-btn-wrapper {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
+        opacity: 0;
+        transition: 0.3s;
+    }
+
+    .chat-wrapper-item:hover .delete-btn-wrapper {
+        opacity: 1;
+    }
+
+    .delete-btn {
+        color: #e53e3e;
+        background: rgba(229, 62, 62, 0.1);
+        border: none;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.3s;
+    }
+
+        .delete-btn:hover {
+            background: #e53e3e;
+            color: white;
+        }
+</style>
+
+<div class="container">
+    <div class="inbox-container">
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show m-3 rounded-pill shadow-sm" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show m-3 rounded-pill shadow-sm" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="inbox-header">
+            <h3 class="fw-bold mb-0"><i class="bi bi-chat-left-text-fill text-primary me-2"></i>Messages</h3>
+            <span class="badge bg-light text-dark border shadow-sm">@Model.Count Conversations</span>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-chat-dots text-muted opacity-25" style="font-size: 4rem;"></i>
+                <p class="text-muted mt-3">No messages yet. Start a conversation!</p>
+            </div>
+        }
+
+        @foreach (var c in Model)
+        {
+            <div class="chat-wrapper-item @(c.UnseenCount > 0 ? "unread" : "")">
+
+                <a href="/Chat/Index?requestId=@c.RequestId" class="chat-item-link">
+                    <img src="@(c.OtherUserImage ?? "/images/default.png")" class="user-avatar" alt="User">
+
+                    <div class="chat-info">
+                        <div class="chat-name">@c.OtherUserName</div>
+                        <div class="last-msg">
+                            @if (c.UnseenCount > 0)
+                            {
+                                <strong>@c.LastMessage</strong>
+                            }
+                            else
+                            {
+                                <span>@c.LastMessage</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="chat-meta">
+                        <div class="status-pill mb-1 shadow-sm">@c.Status</div>
+                        @if (c.UnseenCount > 0)
+                        {
+                            <div class="unread-badge shadow-sm">@c.UnseenCount</div>
+                        }
+                    </div>
+                </a>
+
+                <div class="delete-btn-wrapper">
+                    <form asp-controller="Chat" asp-action="DeleteChat" method="post"
+                          onsubmit="return confirm('Are you sure you want to permanently delete this conversation?');">
+                        <input type="hidden" name="requestId" value="@c.RequestId" />
+                        <button type="submit" class="delete-btn" title="Delete Conversation">
+                            <i class="bi bi-trash3-fill"></i>
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        }
+    </div>
+</div>

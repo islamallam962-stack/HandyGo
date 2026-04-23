@@ -1,0 +1,386 @@
+@model HandyGo.web.Models.User
+@using Microsoft.AspNetCore.Http
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<style>
+    body {
+        background-color: #f4f7f6;
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px 15px 0 0;
+        margin-bottom: 0;
+    }
+
+    .main-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        border: none;
+        overflow: hidden;
+    }
+
+    .nav-tabs-custom {
+        display: flex;
+        gap: 10px;
+        background: #fff;
+        padding: 15px 25px;
+        border-bottom: 1px solid #edf2f7;
+    }
+
+    .tab-btn {
+        padding: 10px 25px;
+        border: none;
+        background: #f8f9fa;
+        cursor: pointer;
+        border-radius: 10px;
+        transition: 0.3s;
+        font-weight: 600;
+        color: #4a5568;
+    }
+
+    .tab-btn.active {
+        background: #007bff;
+        color: white;
+        box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+    }
+
+    .tab-content {
+        display: none;
+        padding: 30px;
+        animation: fadeIn 0.4s ease;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    .profile-img {
+        border: 5px solid white;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: 0.3s;
+    }
+
+    .profile-info-item {
+        padding: 12px;
+        border-bottom: 1px solid #f1f1f1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .upgrade-card {
+        background: linear-gradient(145deg, #fdfdfe, #f4f7f6);
+        border: 2px dashed #cbd5e1;
+        transition: all 0.3s ease;
+    }
+
+    .upgrade-card:hover {
+        border-color: #007bff;
+        background: #f8fbff;
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="container mt-5 mb-5">
+    <div class="main-card">
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show m-3 mb-0 rounded-4 shadow-sm" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show m-3 mb-0 rounded-4 shadow-sm" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-info alert-dismissible fade show m-3 mb-0 rounded-4 shadow-sm" role="alert">
+                <i class="bi bi-info-circle-fill me-2"></i>@TempData["Message"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="profile-header">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-person-circle fs-1 me-3"></i>
+                <div>
+                    <h2 class="mb-0 fw-bold">My Profile</h2>
+                    <p class="mb-0 opacity-75">Welcome back, @Model.Name</p>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.Role == "Technician" && !string.IsNullOrEmpty(Model.AdminNote))
+        {
+            <div style="background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 15px; border-radius: 8px; margin: 20px; border-right: 5px solid #ffc107;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <strong> ‰»ÌÂ „‰ «·≈œ«—…:</strong> @Model.AdminNote
+                    </span>
+                    <small style="font-size: 11px;">@Model.AdminNoteDate?.ToString("g")</small>
+                </div>
+                <form asp-action="ClearAdminNote" method="post" style="margin-top: 10px;">
+                    <button type="submit" style="background: none; border: none; color: #856404; text-decoration: underline; cursor: pointer; font-size: 12px;">
+                        ·ﬁœ ﬁ—√  «·—”«·… (≈Œ›«¡)
+                    </button>
+                </form>
+            </div>
+        }
+
+        <div class="nav-tabs-custom">
+            <button onclick="openTab('profileTab')" class="tab-btn active"><i class="bi bi-person me-1"></i> Profile</button>
+            @if (Context.Session.GetString("UserRole") != "Admin")
+            {
+                <button onclick="openTab('requestsTab')" class="tab-btn"><i class="bi bi-megaphone me-1"></i> My Requests</button>
+                <button onclick="openTab('historyTab')" class="tab-btn"><i class="bi bi-clock-history me-1"></i> History</button>
+            }
+        </div>
+
+        <div id="profileTab" class="tab-content active">
+            <div class="row">
+                <div class="col-md-4 text-center mb-4">
+                    @if (!string.IsNullOrEmpty(Model.ImagePath))
+                    {
+                        <img src="@Model.ImagePath?v=@DateTime.Now.Ticks" width="180" height="180" class="profile-img rounded-circle" style="object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <img src="/images/default.png" width="180" height="180" class="profile-img rounded-circle" style="object-fit: cover;" />
+                    }
+                    <div class="mt-4">
+                        @if (Context.Session.GetString("UserRole") != "Admin")
+                        {
+                            <a asp-action="Edit" class="btn btn-primary rounded-pill px-4 shadow-sm">Edit Profile</a>
+                        }
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="card border-0 bg-light rounded-4 p-3 mb-4 shadow-sm">
+                        <div class="profile-info-item">
+                            <strong>Full Name</strong> 
+                            <span>
+                                @Model.Name
+                                @if (Model.Role == "Technician" && Model.VerificationStatus == "Verified")
+                                {
+                                    <i class="bi bi-patch-check-fill text-primary ms-1 fs-5" data-bs-toggle="tooltip" title="Õ”«» „ÊÀﬁ Ê„ı⁄ „œ"></i>
+                                }
+                            </span>
+                        </div>
+                        <div class="profile-info-item"><strong>Email Address</strong> <span>@Model.Email</span></div>
+                        <div class="profile-info-item"><strong>Phone Number</strong> <span>@(string.IsNullOrEmpty(Model.Phone) ? "Not Provided" : Model.Phone)</span></div>
+                        <div class="profile-info-item"><strong>Account Role</strong> <span class="badge bg-dark px-3 py-2 rounded-pill">@Model.Role</span></div>
+
+                        @if (Model.Role == "Technician")
+                        {
+                            <div class="profile-info-item"><strong>Category</strong> <span class="text-primary fw-bold">@Model.Category</span></div>
+                            <div class="profile-info-item"><strong>Skills</strong> <span>@Model.Skills</span></div>
+                            <div class="profile-info-item border-bottom-0"><strong>Certificates</strong> <span>@Model.Certificates</span></div>
+                        }
+                    </div>
+
+                    @if (Model.Role == "Technician")
+                    {
+                        <div class="card mt-4 border-0 shadow-sm rounded-4" style="background-color: #f8fbff; border-left: 5px solid #007bff !important;">
+                            <div class="card-body p-4">
+                                <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-shield-check text-primary me-2"></i> „—ﬂ“ «· ÊÀÌﬁ Ê«·«⁄ „«œ</h5>
+                                
+                                @if (Model.VerificationStatus == "Verified")
+                                {
+                                    <div class="alert alert-success d-flex align-items-center mb-0 border-0 bg-success bg-opacity-10 text-success rounded-3">
+                                        <i class="bi bi-patch-check-fill fs-1 me-3"></i>
+                                        <div>
+                                            <h6 class="fw-bold mb-1">Õ”«»ﬂ „ÊÀﬁ Ê„ı⁄ „œ —”„Ì«</h6>
+                                            <small class="mb-0"> Â«‰Ì‰«! Õ”«»ﬂ ÌÕ„· ‘«—… «· ÊÀÌﬁ „„« Ì÷«⁄› Àﬁ… «·⁄„·«¡ »ﬂ ÊÌ“Ìœ „‰ ›—’ «·⁄„·.</small>
+                                        </div>
+                                    </div>
+                                }
+                                else if (Model.VerificationStatus == "Pending")
+                                {
+                                    <div class="alert alert-warning d-flex align-items-center mb-0 border-0 bg-warning bg-opacity-10 text-dark rounded-3">
+                                        <i class="bi bi-hourglass-split fs-1 me-3 text-warning"></i>
+                                        <div>
+                                            <h6 class="fw-bold mb-1">Ã«—Ì „—«Ã⁄… «·√Ê—«ﬁ</h6>
+                                            <small class="mb-0">·ﬁœ ﬁ„  »—›⁄ „” ‰œ« ﬂ »‰Ã«Õ. ›—Ìﬁ «·≈œ«—… ÌﬁÊ„ »„—«Ã⁄ Â« «·¬‰ Ê”‰⁄·„ﬂ »«·‰ ÌÃ… ›Ê— «·«‰ Â«¡.</small>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    @if (Model.VerificationStatus == "Rejected")
+                                    {
+                                        <div class="alert alert-danger mb-3 border-0 bg-danger bg-opacity-10 text-danger rounded-3">
+                                            <strong><i class="bi bi-x-circle-fill me-1"></i>  „ —›÷ «·√Ê—«ﬁ «·”«»ﬁ…:</strong> <br />
+                                            <small>@Model.VerificationRejectionReason</small>
+                                        </div>
+                                    }
+
+                                    <p class="text-muted small mb-4">
+                                        «·⁄„·«¡ Ì›÷·Ê‰ «·›‰ÌÌ‰ «·„ÊÀﬁÌ‰! ﬁ„ »—›⁄ ’Ê—… Ê«÷Õ… ·»ÿ«ﬁ ﬂ «·‘Œ’Ì… · Õ’· ⁄·Ï ‘«—… «· ÊÀÌﬁ <i class="bi bi-patch-check-fill text-primary"></i> „Ã«‰«.
+                                    </p>
+                                    
+                                    <form asp-action="SubmitVerification" asp-controller="Profile" method="post" enctype="multipart/form-data">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold text-dark small">’Ê— «·»ÿ«ﬁ… („‰ 1 ≈·Ï 5 ’Ê—) <span class="text-danger">*</span></label>
+                                                <input type="file" name="idCards" class="form-control" accept="image/*" multiple required onchange="validateFiles(this)">
+                                                <small class="text-muted d-block mt-1"><i class="bi bi-info-circle me-1"></i>Ê‘ ÊŸÂ— (»Õœ √ﬁ’Ï 5 „ÌÃ« ··’Ê—…)</small>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold text-dark small">«·›Ì‘ «·Ã‰«∆Ì / ‘Â«œ… «·Õ—›… («Œ Ì«—Ì)</label>
+                                                <input type="file" name="certificate" class="form-control" accept="image/*" onchange="validateFiles(this, true)">
+                                                <small class="text-muted d-block mt-1"><i class="bi bi-info-circle me-1"></i>»Õœ √ﬁ’Ï 5 „ÌÃ« ··’Ê—…</small>
+                                            </div>
+                                            <div class="col-12 mt-4 text-end">
+                                                <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm w-100 w-md-auto">
+                                                    <i class="bi bi-cloud-arrow-up me-2"></i> ≈—”«· «·„” ‰œ«  ··„—«Ã⁄…
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <div class="card mt-4 border-0 shadow-sm rounded-4" style="background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);">
+                        <div class="card-body p-4 text-center">
+                            <h5 class="fw-bold mb-2 text-warning"><i class="bi bi-gift-fill me-2"></i> »—‰«„Ã «·„ﬂ«›¬ </h5>
+                            <p class="text-muted small mb-3">ﬁ„ »œ⁄Ê… 5 ›‰ÌÌ‰ ·· ”ÃÌ· Ê ÊÀÌﬁ Õ”«»« Â„ (»‘Â«œ… Œ»—…) Ê«—»Õ <strong>500 Ã.„</strong>  ÷«› ·„Õ›Ÿ ﬂ ›Ê—«!</p>
+                            <div class="bg-white rounded-pill py-2 px-3 d-inline-block border border-warning shadow-sm">
+                                <span class="fw-bold text-dark me-2">ﬂÊœ «·œ⁄Ê… «·Œ«’ »ﬂ:</span>
+                                <span class="text-primary fw-bold font-monospace fs-5">@(Model.ReferralCode ?? "”ÌŸÂ— ﬁ—Ì»«")</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (Model.Role == "Client")
+                    {
+                        <div class="upgrade-card mt-4 p-4 rounded-4 text-center shadow-sm">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3" style="width: 60px; height: 60px;">
+                                <i class="bi bi-tools fs-3"></i>
+                            </div>
+                            <h5 class="fw-bold text-dark mb-2">Are you a skilled professional?</h5>
+                            <p class="text-muted small mb-4">Join our HandyGo team and start receiving service requests today.</p>
+                            <a asp-controller="Profile" asp-action="UpgradeToTechnician" class="btn btn-success rounded-pill px-5 py-2 fw-bold shadow-sm">
+                                <i class="bi bi-briefcase-fill me-2"></i>Join as Technician
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @if (Model.Role != "Admin")
+        {
+            
+            @await Html.PartialAsync("_UserRequests", Model)
+        }
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+
+    function validateFiles(input, isSingle = false) {
+        const maxSize = 5 * 1024 * 1024; 
+        
+        if (!isSingle && input.files.length > 5) {
+            alert("·« Ì„ﬂ‰ﬂ —›⁄ √ﬂÀ— „‰ 5 ’Ê— ﬂÕœ √ﬁ’Ï ·≈À»«  «·ÂÊÌ….");
+            input.value = ""; 
+            return;
+        }
+
+        for (let i = 0; i < input.files.length; i++) {
+            if (input.files[i].size > maxSize) {
+                alert("ÕÃ„ «·’Ê—… (" + input.files[i].name + ") Ì ŒÿÏ 5 „ÌÃ«»«Ì ! Ì—ÃÏ «Œ Ì«— ’Ê—… √’€—.");
+                input.value = ""; 
+                return;
+            }
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        var activeTab = localStorage.getItem("activeTab");
+        if (activeTab) {
+            openTab(activeTab, true);
+        }
+    });
+
+    function openTab(tabName, isLoad = false) {
+        var contents = document.getElementsByClassName("tab-content");
+        for (var i = 0; i < contents.length; i++) contents[i].classList.remove("active");
+
+        var btns = document.getElementsByClassName("tab-btn");
+        for (var i = 0; i < btns.length; i++) btns[i].classList.remove("active");
+
+        var targetTab = document.getElementById(tabName);
+        if (targetTab) {
+            targetTab.classList.add("active");
+        }
+
+        if (!isLoad && window.event && window.event.currentTarget) {
+            window.event.currentTarget.classList.add("active");
+        } else {
+            var btn = document.querySelector("button[onclick=\"openTab('" + tabName + "')\"]");
+            if (btn) btn.classList.add("active");
+        }
+
+        localStorage.setItem("activeTab", tabName);
+    }
+
+    function toggleReportForm(requestId) {
+        var form = document.getElementById('complaintContainer-' + requestId);
+        form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
+    }
+
+    function submitComplaintAjax(requestId) {
+        var subject = document.getElementById('subject-' + requestId).value;
+        var desc = document.getElementById('desc-' + requestId).value;
+        var statusDiv = document.getElementById('status-' + requestId);
+        
+        if (!subject || !desc) { 
+            alert("Please fill in both subject and description."); 
+            return; 
+        }
+
+        $.ajax({
+            url: '/Profile/SubmitComplaint',
+            type: 'POST',
+            data: { requestId: requestId, subject: subject, description: desc },
+            success: function () {
+                statusDiv.innerHTML = '<span class="text-success fw-bold small">? Submitted successfully.</span>';
+                document.getElementById('subject-' + requestId).value = '';
+                document.getElementById('desc-' + requestId).value = '';
+                setTimeout(function() { 
+                    toggleReportForm(requestId); 
+                    statusDiv.innerHTML = ''; 
+                }, 2500);
+            },
+            error: function () { 
+                statusDiv.innerHTML = '<span class="text-danger small">? Error sending complaint.</span>'; 
+            }
+        });
+    }
+</script>

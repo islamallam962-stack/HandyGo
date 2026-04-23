@@ -1,0 +1,223 @@
+@model List<HandyGo.web.Models.User>
+@{
+    ViewData["Title"] = "„—ﬂ“ «· ÊÀÌﬁ Ê«·«⁄ „«œ« ";
+    var currentStatus = ViewBag.CurrentStatus as string;
+}
+
+<div class="container py-5">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success shadow-sm rounded-4 mb-4"><i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]</div>
+    }
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold text-dark mb-1"><i class="bi bi-shield-check text-primary me-2"></i> „—ﬂ“ «· ÊÀÌﬁ Ê«·√—‘Ì›</h2>
+            <p class="text-muted mb-0 small">—«Ã⁄ «·√Ê—«ﬁ° «·»ÿ«ﬁ« ° Ê«·›Ì‘ «·Ã‰«∆Ì ··›‰ÌÌ‰ ·≈⁄ÿ«∆Â„ ‘«—… «·«⁄ „«œ.</p>
+        </div>
+        
+        <div class="input-group" style="max-width: 300px;">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" id="searchInput" class="form-control border-start-0 ps-0" placeholder="«»ÕÀ »«·«”„ √Ê «·Â« ›...">
+        </div>
+    </div>
+
+    <div class="d-flex gap-2 mb-4 overflow-auto pb-2">
+        <a href="/Admin/Verifications?status=Pending" class="btn rounded-pill px-4 fw-bold @(currentStatus == "Pending" ? "btn-warning" : "btn-light border")">
+            <i class="bi bi-hourglass-split me-1"></i> ÿ·»«  ÃœÌœ… ··„—«Ã⁄…
+        </a>
+        <a href="/Admin/Verifications?status=Verified" class="btn rounded-pill px-4 fw-bold @(currentStatus == "Verified" ? "btn-success" : "btn-light border")">
+            <i class="bi bi-patch-check-fill me-1"></i> «·›‰ÌÌ‰ «·„ÊÀﬁÌ‰ («·√—‘Ì›)
+        </a>
+        <a href="/Admin/Verifications?status=Rejected" class="btn rounded-pill px-4 fw-bold @(currentStatus == "Rejected" ? "btn-danger" : "btn-light border")">
+            <i class="bi bi-x-circle-fill me-1"></i> «·„—›Ê÷Ì‰
+        </a>
+        <a href="/Admin/Verifications?status=All" class="btn rounded-pill px-4 fw-bold @(currentStatus == "All" ? "btn-primary" : "btn-light border")">
+            <i class="bi bi-list-ul me-1"></i> «·ﬂ·
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-body p-0">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="verificationsTable">
+                        <thead class="bg-light text-muted small text-uppercase">
+                            <tr>
+                                <th class="py-3 px-4">»Ì«‰«  «·›‰Ì</th>
+                                <th class="py-3">«·„Â‰… / «·Â« ›</th>
+                                <th class="py-3 text-center">’Ê—… «·»ÿ«ﬁ… (Ê‘ ÊŸÂ—)</th>
+                                <th class="py-3 text-center">«·›Ì‘ «·Ã‰«∆Ì / «·‘Â«œ…</th>
+                                <th class="py-3 text-center">«·Õ«·…</th>
+                                <th class="py-3 text-center">«·≈Ã—«¡« </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model)
+                            {
+                                <tr>
+                                    <td class="px-4">
+                                        <div class="d-flex align-items-center searchable-name">
+                                            <img src="@(user.ImagePath ?? "/images/default.png")" class="rounded-circle me-3 border" width="45" height="45" style="object-fit:cover;">
+                                            <div>
+                                                <h6 class="fw-bold mb-0 text-dark">@user.Name</h6>
+                                                <small class="text-muted">ID: #@user.Id</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold text-primary">@user.Category</div>
+                                        <div class="small text-muted searchable-phone"><i class="bi bi-telephone me-1"></i> @(user.Phone ?? "·« ÌÊÃœ")</div>
+                                    </td>
+                                    
+                                    <td class="text-center" style="max-width: 150px;">
+                                        @if (!string.IsNullOrEmpty(user.IdCardImage))
+                                        {
+                                            var images = user.IdCardImage.Split(',');
+                                            <div class="d-flex flex-wrap justify-content-center gap-1">
+                                                @foreach (var img in images)
+                                                {
+                                                    <img src="@img" class="rounded-2 border cursor-pointer" width="40" height="30" style="object-fit:cover; cursor:pointer;" onclick="showImageModal('@img', '»ÿ«ﬁ… ÂÊÌ…: @user.Name')" title="«÷€ÿ ·· ﬂ»Ì—">
+                                                }
+                                            </div>
+                                            <div class="small text-muted mt-1">(@images.Length ’Ê—)</div>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">€Ì— „ Ê›—</span>
+                                        }
+                                    </td>
+
+                                    <td class="text-center">
+                                        @if (!string.IsNullOrEmpty(user.CertificateImage))
+                                        {
+                                            <img src="@user.CertificateImage" class="rounded-3 border cursor-pointer" width="80" height="50" style="object-fit:cover; cursor:pointer;" onclick="showImageModal('@user.CertificateImage', '«·›Ì‘ «·Ã‰«∆Ì / «·‘Â«œ…: @user.Name')" title="«÷€ÿ ·· ﬂ»Ì—">
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small border px-2 py-1 rounded-pill">·„ Ì—›ﬁ «·›Ì‘</span>
+                                        }
+                                    </td>
+
+                                    <td class="text-center">
+                                        @if (user.VerificationStatus == "Pending")
+                                        {
+                                            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill"><i class="bi bi-hourglass-split me-1"></i> „—«Ã⁄…</span>
+                                        }
+                                        else if (user.VerificationStatus == "Verified")
+                                        {
+                                            <span class="badge bg-success px-3 py-2 rounded-pill"><i class="bi bi-patch-check-fill me-1"></i> „ÊÀﬁ</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger px-3 py-2 rounded-pill"><i class="bi bi-x-circle-fill me-1"></i> „—›Ê÷</span>
+                                        }
+                                    </td>
+
+                                    <td class="text-center">
+                                        @if (user.VerificationStatus == "Pending" || user.VerificationStatus == "Rejected")
+                                        {
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <form asp-action="ApproveVerification" method="post" onsubmit="return confirm(' √ﬂÌœ: Â· «·√Ê—«ﬁ ”·Ì„… Ê„ÿ«»ﬁ…ø ”Ì „ ≈⁄ÿ«¡ «·›‰Ì ‘«—… «· ÊÀÌﬁ.');">
+                                                    <input type="hidden" name="id" value="@user.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm" title="„Ê«›ﬁ… Ê«⁄ „«œ"><i class="bi bi-check-lg"></i> ﬁ»Ê·</button>
+                                                </form>
+
+                                                @if (user.VerificationStatus != "Rejected")
+                                                {
+                                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#rejectModal-@user.Id" title="—›÷ »”»» Œÿ√ ›Ì «·√Ê—«ﬁ"><i class="bi bi-x-lg"></i> —›÷</button>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-sm btn-light border rounded-pill px-3 text-muted" disabled><i class="bi bi-check-all me-1"></i>  „ «·≈Ã—«¡</button>
+                                        }
+                                    </td>
+                                </tr>
+
+                                <div class="modal fade" id="rejectModal-@user.Id" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content border-0 shadow rounded-4">
+                                            <div class="modal-header bg-danger text-white border-0 rounded-top-4">
+                                                <h5 class="modal-title fw-bold">≈‘⁄«— »—›÷ «·√Ê—«ﬁ</h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <form asp-action="RejectVerification" method="post">
+                                                <div class="modal-body p-4">
+                                                    <input type="hidden" name="id" value="@user.Id" />
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">”»» «·—›÷ (”Ì „ ≈—”«·Â ··›‰Ì):</label>
+                                                        <select name="reason" class="form-select mb-2" onchange="if(this.value=='√Œ—Ï'){document.getElementById('customReason-@user.Id').style.display='block'; document.getElementById('customReason-@user.Id').required=true;}else{document.getElementById('customReason-@user.Id').style.display='none'; document.getElementById('customReason-@user.Id').required=false;}">
+                                                            <option value="’Ê—… «·»ÿ«ﬁ… €Ì— Ê«÷Õ… √Ê „ﬁÿÊ⁄….">’Ê—… «·»ÿ«ﬁ… €Ì— Ê«÷Õ… √Ê „ﬁÿÊ⁄….</option>
+                                                            <option value="»—Ã«¡  ’ÊÌ— «·»ÿ«ﬁ… (Ê‘ ÊŸÂ—) „⁄«.">»—Ã«¡  ’ÊÌ— «·»ÿ«ﬁ… (Ê‘ ÊŸÂ—) „⁄«.</option>
+                                                            <option value="«·›Ì‘ «·Ã‰«∆Ì €Ì— „—›ﬁ √Ê „‰ ÂÌ «·’·«ÕÌ….">«·›Ì‘ «·Ã‰«∆Ì €Ì— „—›ﬁ √Ê €Ì— Ê«÷Õ.</option>
+                                                            <option value="√Œ—Ï">√Œ—Ï (ﬂ «»… ”»» „Œ’’)...</option>
+                                                        </select>
+                                                        <input type="text" id="customReason-@user.Id" name="reason" class="form-control mt-2" style="display:none;" placeholder="«ﬂ » «·”»» Â‰«..." disabled oninput="this.disabled=false; this.previousElementSibling.name=''; this.name='reason';" />
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer border-0 bg-light rounded-bottom-4">
+                                                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">≈·€«¡</button>
+                                                    <button type="submit" class="btn btn-danger fw-bold rounded-pill px-4">≈—”«· «·—›÷ ··›‰Ì</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center p-5">
+                    <i class="bi bi-folder2-open text-muted opacity-50" style="font-size: 5rem;"></i>
+                    <h5 class="mt-3 fw-bold text-muted">·«  ÊÃœ ”Ã·«  ›Ì Â–« «·ﬁ”„</h5>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title text-white fw-bold shadow-sm" id="imagePreviewTitle" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.8);"></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-0 mt-2">
+                <img id="previewImage" src="" class="img-fluid rounded-4 shadow-lg border border-3 border-white" style="max-height: 80vh;" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function showImageModal(imageSrc, title) {
+        document.getElementById('previewImage').src = imageSrc;
+        document.getElementById('imagePreviewTitle').innerText = title;
+        var myModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+        myModal.show();
+    }
+
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        var searchValue = this.value.toLowerCase();
+        var tableRows = document.querySelectorAll('#verificationsTable tbody tr');
+        
+        tableRows.forEach(function(row) {
+            var name = row.querySelector('.searchable-name').textContent.toLowerCase();
+            var phone = row.querySelector('.searchable-phone').textContent.toLowerCase();
+            
+            if (name.includes(searchValue) || phone.includes(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>

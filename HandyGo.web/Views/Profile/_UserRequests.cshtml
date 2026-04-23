@@ -1,0 +1,428 @@
+@model HandyGo.web.Models.User
+
+<style>
+    .request-item-card {
+        border: 1px solid #eef2f7;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 15px;
+        background-color: #fff;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        transition: 0.3s;
+    }
+
+        .request-item-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.07);
+        }
+
+    .stepper-wrapper {
+        margin-top: 30px;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    .stepper-item {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        z-index: 1;
+    }
+
+        .stepper-item::before {
+            position: absolute;
+            content: "";
+            border-bottom: 2px solid #e0e0e0;
+            width: 100%;
+            top: 20px;
+            left: -50%;
+            z-index: -1;
+        }
+
+        .stepper-item::after {
+            position: absolute;
+            content: "";
+            border-bottom: 2px solid #e0e0e0;
+            width: 100%;
+            top: 20px;
+            left: 50%;
+            z-index: -1;
+        }
+
+        .stepper-item .step-counter {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            margin-bottom: 6px;
+            color: #fff;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .stepper-item.active .step-counter {
+            background-color: #007bff;
+            box-shadow: 0 0 10px rgba(0,123,255,0.4);
+        }
+
+        .stepper-item.completed .step-counter {
+            background-color: #28a745;
+        }
+
+        .stepper-item.completed::after {
+            border-bottom: 2px solid #28a745;
+        }
+
+        .stepper-item:first-child::before, .stepper-item:last-child::after {
+            content: none;
+        }
+
+    .step-name {
+        font-size: 11px;
+        color: #777;
+        font-weight: 500;
+    }
+
+    .active .step-name {
+        color: #007bff;
+        font-weight: bold;
+    }
+
+    .completed .step-name {
+        color: #28a745;
+    }
+</style>
+
+<div id="requestsTab" class="tab-content">
+    <h3 class="fw-bold mb-4 text-dark"><i class="bi bi-activity me-2"></i>Active Orders</h3>
+
+    @{
+        var finishedStatuses = new[] { "Completed", "NotCompleted", "Rejected", "Closed" };
+    }
+
+    @foreach (var r in ViewBag.Requests)
+    {
+
+        if ((r.ClientId == Model.Id || r.TechnicianId == Model.Id) && !finishedStatuses.Contains((string)r.Status))
+        {
+            <div class="request-item-card">
+                <div class="user-line" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div style="display: flex; align-items: center;">
+                        @if (Model.Role == "Client" && r.Technician != null)
+                        {
+                            <a asp-controller="Profile" asp-action="Details" asp-route-id="@r.Technician.Id" class="d-flex align-items-center text-decoration-none text-dark">
+                                <img src="@(r.Technician.ImagePath ?? "/images/default.png")" class="avatar clickable" style="width:50px; height:50px; border-radius:50%; margin-right:12px; object-fit: cover; border: 2px solid #eee;" />
+                                <div>
+                                    <small class="text-muted d-block">Technician</small>
+                                    <strong class="text-primary">@r.Technician.Name</strong>
+                                </div>
+                            </a>
+                        }
+                        else if (Model.Role == "Technician" && r.Client != null)
+                        {
+                            <a asp-controller="Profile" asp-action="Details" asp-route-id="@r.Client.Id" class="d-flex align-items-center text-decoration-none text-dark">
+                                <img src="@(r.Client.ImagePath ?? "/images/default.png")" class="avatar clickable" style="width:50px; height:50px; border-radius:50%; margin-right:12px; object-fit: cover; border: 2px solid #eee;" />
+                                <div>
+                                    <small class="text-muted d-block">Client</small>
+                                    <strong class="text-primary">@r.Client.Name</strong>
+                                </div>
+                            </a>
+                        }
+                    </div>
+
+                    @if (Model.Role == "Client" && r.Status == "Pending")
+                    {
+                        <form asp-action="CancelRequest" asp-controller="Profile" method="post" onsubmit="return confirm('Are you sure?');">
+                            <input type="hidden" name="requestId" value="@r.Id" />
+                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                <i class="bi bi-trash"></i> Cancel
+                            </button>
+                        </form>
+                    }
+                </div>
+
+                <div class="stepper-wrapper">
+                    <div class="stepper-item @(r.Status == "Pending" ? "active" : "completed")">
+                        <div class="step-counter"><i class="bi bi-file-earmark-text"></i></div>
+                        <div class="step-name">Requested</div>
+                    </div>
+                    <div class="stepper-item @((r.Status == "Accepted" || r.Status == "WaitingForClientAcceptance" || r.Status == "PendingPayment" || r.Status == "PendingCard" || r.Status == "PendingCash") ? "active" : (r.Status == "InProgress" || r.Status == "PendingClientConfirmation" ? "completed" : ""))">
+                        <div class="step-counter"><i class="bi bi-hand-thumbs-up"></i></div>
+                        <div class="step-name">Accepted/Paid</div>
+                    </div>
+                    <div class="stepper-item @(r.Status == "InProgress" ? "active" : (r.Status == "PendingClientConfirmation" ? "completed" : ""))">
+                        <div class="step-counter"><i class="bi bi-tools"></i></div>
+                        <div class="step-name">In Progress</div>
+                    </div>
+                    <div class="stepper-item @(r.Status == "PendingClientConfirmation" ? "active" : "")">
+                        <div class="step-counter"><i class="bi bi-check2-all"></i></div>
+                        <div class="step-name">Finished</div>
+                    </div>
+                </div>
+
+                <div style="background: #f8fbff; padding: 15px; border-radius: 12px; margin-top: 10px; border: 1px solid #e1e9f4;">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <p class="mb-1"><i class="bi bi-tools me-2 text-primary"></i><b>Service:</b> @r.ServiceType</p>
+                            <p class="mb-0 text-muted"><i class="bi bi-geo-alt me-2 text-danger"></i><b>Location:</b> @r.Address</p>
+                            @if (r.Price != null)
+                            {
+                                <p class="mb-0 mt-1 text-success"><i class="bi bi-cash me-2"></i><b>Price:</b> @r.Price EGP</p>
+                            }
+                        </div>
+                        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                            <span class="badge @(r.Status == "InProgress" ? "bg-primary" : "bg-warning text-dark") px-3 py-2 rounded-pill">
+                                @r.Status
+                            </span>
+                            <div class="mt-2 small text-muted">@r.CreatedAt.ToString("g")</div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (Model.Role == "Technician" && r.Status == "Accepted")
+                {
+                    <form action="/TechnicianRequests/StartService" method="post" class="mt-3">
+                        <input type="hidden" name="id" value="@r.Id" />
+                        <button type="submit" class="btn btn-success w-100 rounded-pill shadow-sm py-2">
+                            <i class="bi bi-play-fill"></i> Start Service Now
+                        </button>
+                    </form>
+                }
+                
+                @if (Model.Role == "Technician" && r.Status == "InProgress")
+                {
+                    <form action="/TechnicianRequests/FinishService" method="post" class="mt-3">
+                        <input type="hidden" name="id" value="@r.Id" />
+                        <div class="d-flex gap-2">
+                            <button name="completed" value="true" class="btn btn-primary flex-grow-1 rounded-pill shadow-sm py-2">
+                                <i class="bi bi-check-circle"></i> Mark Completed
+                            </button>
+                            <button name="completed" value="false" class="btn btn-outline-secondary flex-grow-1 rounded-pill py-2" onsubmit="return confirm('Are you sure?');">
+                                Not Completed
+                            </button>
+                        </div>
+                    </form>
+                }
+
+                @if (Model.Role == "Client" && r.Status == "PendingClientConfirmation")
+                {
+                    <div class="alert alert-warning mt-3 mb-2 p-2 small border-warning rounded-3 shadow-sm">
+                        <i class="bi bi-info-circle-fill me-1"></i> The technician reported finishing the job. Please confirm to release funds.
+                    </div>
+                    
+                    <form action="/OffersPrice/ConfirmServiceCompletion" method="post" class="mt-2" onsubmit="return confirm('Are you sure the service is completed satisfactorily? Funds will be released to the technician.');">
+                        <input type="hidden" name="requestId" value="@r.Id" />
+                        <button type="submit" class="btn btn-success w-100 fw-bold rounded-pill shadow-sm py-2">
+                            <i class="bi bi-check-circle-fill me-1"></i> Confirm Completion & Release Funds
+                        </button>
+                    </form>
+                }
+
+                
+                @if (r.PaymentStatus == "InEscrow" && r.Status != "Completed")
+                {
+                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold mt-3" data-bs-toggle="modal" data-bs-target="#disputeModal-@r.Id">
+                        <i class="bi bi-shield-exclamation"></i> @(Model.Role == "Client" ? "› Õ ‰“«⁄ „«·Ì" : "—›⁄ ‘ﬂÊÏ „«·Ì…")
+                    </button>
+                }
+                else if (r.PaymentStatus == "Disputed")
+                {
+                    <span class="badge bg-danger px-3 py-2 rounded-pill mt-3"><i class="bi bi-lock-fill me-1"></i> √„Ê«· „Ã„œ… (ÌÊÃœ ‰“«⁄)</span>
+                }
+            </div>
+
+            @if (r.PaymentStatus == "InEscrow" && r.Status != "Completed")
+            {
+                <div class="modal fade" id="disputeModal-@r.Id" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 shadow rounded-4">
+                            <div class="modal-header bg-danger text-white border-0">
+                                <h5 class="modal-title fw-bold"><i class="bi bi-shield-exclamation me-2"></i> @(Model.Role == "Client" ? "› Õ ‰“«⁄ „«·Ì Ê Ã„Ìœ «·√„Ê«·" : "«·≈»·«€ ⁄‰ „‘ﬂ·… ›Ì  Õ’Ì· «·√„Ê«·")</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form asp-action="RaiseFinancialDispute" asp-controller="Profile" method="post">
+                                <div class="modal-body p-4 bg-light text-start">
+                                    <div class="alert alert-warning small rounded-3">
+                                        <i class="bi bi-info-circle-fill me-1"></i>
+                                        @(Model.Role == "Client" ? "»„Ã—œ «· √ﬂÌœ° ”Ì „  Ã„Ìœ √„Ê«· Â–« «·ÿ·» Ê·‰ Ì „  ÕÊÌ·Â« ··›‰Ì Õ Ï  ›’· «·≈œ«—… ›Ì «·„‘ﬂ·…." : "«” Œœ„ Â–« «·ŒÌ«— ≈–« ﬁ„  »≈‰Ã«“ «·⁄„· Ê«·⁄„Ì· Ì—›÷  √ﬂÌœ «·«” ·«„ · Õ—Ì— √—»«Õﬂ.")
+                                    </div>
+                                    <input type="hidden" name="requestId" value="@r.Id" />
+                                    
+                                    <label class="form-label fw-bold small text-dark">”»» «·„‘ﬂ·…:</label>
+                                    <select name="reason" class="form-select mb-3" required>
+                                        <option value="">-- «Œ — «·”»» --</option>
+                                        @if (Model.Role == "Client")
+                                        {
+                                            <option value="«·›‰Ì ·„ ÌÕ÷—">«·›‰Ì ·„ ÌÕ÷— ›Ì «·„Ê⁄œ</option>
+                                            <option value="«·›‰Ì ·„ Ìﬂ„· «·⁄„·">«·›‰Ì ·„ Ìﬂ„· «·⁄„· «·„ ›ﬁ ⁄·ÌÂ</option>
+                                            <option value="ÃÊœ… «·⁄„· ”Ì∆…">ÃÊœ… «·⁄„· ”Ì∆… Ãœ«</option>
+                                            <option value="«·›‰Ì Ìÿ·» √„Ê«· ≈÷«›Ì…">«·›‰Ì Ìÿ·» √„Ê«· ≈÷«›Ì… Œ«—Ã «·„ ›ﬁ ⁄·ÌÂ</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="«·⁄„Ì· Ì—›÷  √ﬂÌœ «·«” ·«„">«·⁄„Ì· Ì—›÷  √ﬂÌœ «·«” ·«„ · Õ—Ì— «·√—»«Õ</option>
+                                            <option value="«·⁄„Ì· √·€Ï «·ÿ·» »⁄œ ≈‰Ã«“ «·⁄„·">«·⁄„Ì· √·€Ï «·ÿ·» »⁄œ ≈‰Ã«“ «·⁄„·</option>
+                                            <option value="«·⁄„Ì· Ì ⁄„œ  √ŒÌ— «·œ›⁄">«·⁄„Ì· Ì ⁄„œ  √ŒÌ— «·œ›⁄</option>
+                                        }
+                                    </select>
+                                    
+                                    <label class="form-label fw-bold small text-dark">«· ›«’Ì·:</label>
+                                    <textarea name="details" class="form-control" rows="3" required placeholder="«‘—Õ «·„‘ﬂ·… »«· ›’Ì· ·Ì „ﬂ‰ ›—Ìﬁ «·≈œ«—… „‰ «·Õﬂ„ »‘ﬂ· ⁄«œ·..."></textarea>
+                                </div>
+                                <div class="modal-footer border-0">
+                                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal"> —«Ã⁄</button>
+                                    <button type="submit" class="btn btn-danger fw-bold rounded-pill px-4">@(Model.Role == "Client" ? " √ﬂÌœ Ê› Õ «·‰“«⁄" : "› Õ «·‰“«⁄ ··Õ’Ê· ⁄·Ï √—»«ÕÌ")</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    }
+</div>
+
+<div id="historyTab" class="tab-content">
+    <h3 class="fw-bold mb-4 text-dark"><i class="bi bi-clock-history me-2"></i>Service History</h3>
+
+    @foreach (var r in ViewBag.Requests)
+    {
+        if (r != null && r.Technician != null && r.Client != null &&
+        (r.ClientId == Model.Id || r.TechnicianId == Model.Id)
+        && finishedStatuses.Contains((string)r.Status))
+        {
+            <div class="request-item-card border-start border-4 @(r.Status == "Completed" ? "border-success" : "border-secondary")">
+                <div class="user-line mb-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        @if (Model.Role == "Client")
+                        {
+                            <a asp-controller="Profile" asp-action="Details" asp-route-id="@r.Technician.Id" class="d-flex align-items-center text-decoration-none text-dark">
+                                <img src="@(r.Technician.ImagePath ?? "/images/default.png")" class="avatar clickable" style="width:45px; height:45px; border-radius:50%; margin-right:12px; object-fit: cover; border:1px solid #ddd;" />
+                                <span><small class="text-muted d-block">Technician</small><b>@r.Technician.Name</b></span>
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Profile" asp-action="Details" asp-route-id="@r.Client.Id" class="d-flex align-items-center text-decoration-none text-dark">
+                                <img src="@(r.Client.ImagePath ?? "/images/default.png")" class="avatar clickable" style="width:45px; height:45px; border-radius:50%; margin-right:12px; object-fit: cover; border:1px solid #ddd;" />
+                                <span><small class="text-muted d-block">Client</small><b>@r.Client.Name</b></span>
+                            </a>
+                        }
+                    </div>
+                    <span class="badge @(r.Status == "Completed" ? "bg-success" : "bg-secondary") px-3 rounded-pill">@r.Status</span>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p class="mb-1 fw-bold">@r.ServiceType</p>
+                        <p class="mb-1 text-muted small"><i class="bi bi-geo-alt"></i> @r.Address</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <small class="text-muted">Request Date: @r.CreatedAt.ToString("MMM dd, yyyy")</small>
+                    </div>
+                </div>
+
+                @if (r.Status == "Completed")
+                {
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 12px; border-left: 4px solid #28a745;">
+                        <div class="row text-center">
+                            <div class="col-6 border-end">
+                                <small class="text-muted d-block">Started:</small>
+                                <span class="fw-bold small text-primary"><i class="bi bi-play-circle"></i> @(r.ActualStartTime != null ? r.ActualStartTime.ToString("h:mm tt") : r.CreatedAt.ToString("h:mm tt"))</span>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Finished:</small>
+                                <span class="fw-bold small text-success"><i class="bi bi-check-circle"></i> @(r.UpdatedAt.Year > 1 ? r.UpdatedAt.ToString("h:mm tt") : "N/A")</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (Model.Role == "Client" && r.Status == "Completed")
+                {
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #eee;">
+                        @if (r.Review != null)
+                        {
+                            <div style="background: #fffdf5; padding: 12px; border-radius: 8px; border: 1px solid #ffecb5;">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <h6 class="text-success small fw-bold mb-0"><i class="bi bi-star-fill"></i> Your Review</h6>
+                                    <div class="text-warning">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <i class="bi @(i <= r.Review.Stars ? "bi-star-fill" : "bi-star")"></i>
+                                        }
+                                    </div>
+                                </div>
+                                @if (!string.IsNullOrEmpty(r.Review.Comment))
+                                {
+                                    <p class="mb-0 small text-dark fst-italic">"@r.Review.Comment"</p>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="small fw-bold mb-0">Rate this technician:</h6>
+                                <button type="button" class="btn btn-sm btn-link text-danger p-0 text-decoration-none" onclick="toggleReportForm('@r.Id')">
+                                    <i class="bi bi-exclamation-triangle"></i> Report Issue
+                                </button>
+                            </div>
+                            <form action="/Profile/SubmitReview" method="post" class="row g-2">
+                                <input type="hidden" name="RequestId" value="@r.Id" />
+                                <input type="hidden" name="TechId" value="@r.TechnicianId" />
+                                <div class="col-sm-4">
+                                    <select name="Stars" class="form-select form-select-sm">
+                                        <option value="5">????? Excellent</option>
+                                        <option value="4">???? Good</option>
+                                        <option value="3">??? Average</option>
+                                        <option value="2">?? Fair</option>
+                                        <option value="1">? Poor</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-6">
+                                    <input type="text" name="Comment" class="form-control form-control-sm" placeholder="Any comments?" />
+                                </div>
+                                <div class="col-sm-2">
+                                    <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold">Rate</button>
+                                </div>
+                            </form>
+                        }
+                        <div id="complaintContainer-@r.Id" style="display:none;" class="mt-3 p-3 border rounded bg-light">
+                            <h6 class="text-danger fw-bold small mb-2">Submit a Complaint</h6>
+                            <input type="text" id="subject-@r.Id" class="form-control form-control-sm mb-2" placeholder="Issue Subject" />
+                            <textarea id="desc-@r.Id" class="form-control form-control-sm mb-2" placeholder="Describe what happened..."></textarea>
+                            <div id="status-@r.Id"></div>
+                            <button type="button" onclick="submitComplaintAjax('@r.Id')" class="btn btn-danger btn-sm px-4">Submit Complaint</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+
+<script>
+    function setStars(element) {
+        let allStars = element.parentElement.querySelectorAll('label');
+        allStars.forEach(s => s.style.color = '#ccc');
+        element.style.color = '#ffc107';
+        let prev = element.nextElementSibling;
+        while(prev && prev.tagName === 'LABEL') {
+            prev.style.color = '#ffc107';
+            prev = prev.nextElementSibling;
+        }
+        let next = element.previousElementSibling;
+        while(next && next.tagName === 'LABEL') {
+            next.style.color = '#ccc';
+            next = next.previousElementSibling;
+        }
+    }
+</script>

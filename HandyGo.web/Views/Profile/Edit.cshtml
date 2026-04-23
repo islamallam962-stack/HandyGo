@@ -1,0 +1,223 @@
+@model HandyGo.web.Models.User
+@using Microsoft.AspNetCore.Http
+
+<link href="https://cdn.jsdelivr.net/npm/@@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
+
+<style>
+    body {
+        background-color: #f4f7f6;
+    }
+
+    .edit-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        border: none;
+        overflow: hidden;
+        max-width: 800px;
+        margin: 50px auto;
+    }
+
+    .edit-header {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        padding: 25px;
+        text-align: center;
+    }
+
+    .form-container {
+        padding: 40px;
+    }
+
+    .image-preview-wrapper {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+
+    .image-preview {
+        width: 150px;
+        height: 150px;
+        border-radius: 15px;
+        object-fit: cover;
+        border: 4px solid #f8f9fa;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #4a5568;
+        margin-bottom: 8px;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        padding: 12px;
+        border: 1px solid #e2e8f0;
+        transition: 0.3s;
+    }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+        }
+
+    .btn-save {
+        background: #007bff;
+        color: white;
+        padding: 12px 40px;
+        border-radius: 10px;
+        font-weight: bold;
+        border: none;
+        transition: 0.3s;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+        .btn-save:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+    .btn-delete-img {
+        background: #ff4d4d;
+        color: white;
+        border: none;
+        padding: 5px 15px;
+        border-radius: 8px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .btn-delete-img:hover {
+            background: #cc0000;
+        }
+
+    
+    .tagify {
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        padding: 5px;
+        background: #fff;
+    }
+
+    .tagify--focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+    }
+</style>
+
+@if (Context.Session.GetString("UserRole") != "Admin")
+{
+    <div class="container">
+        <div class="edit-card">
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show m-3 mb-0" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show m-3 mb-0" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="edit-header">
+                <h2 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>Edit Profile</h2>
+                <p class="mb-0 opacity-75">Update your personal information</p>
+            </div>
+
+            <div class="form-container">
+                <div class="text-center mb-4">
+                    <div class="image-preview-wrapper">
+                        @if (!string.IsNullOrEmpty(Model.ImagePath))
+                        {
+                            <img src="@Model.ImagePath?v=@DateTime.Now.Ticks" class="image-preview" alt="Profile" />
+                            <div class="mt-2">
+                                <form asp-action="DeleteImage" method="post">
+                                    <button type="submit" class="btn-delete-img">
+                                        <i class="bi bi-trash"></i> Delete Image
+                                    </button>
+                                </form>
+                            </div>
+                        }
+                        else
+                        {
+                            <img src="/images/default.png" class="image-preview" style="opacity: 0.6;" alt="Default" />
+                        }
+                    </div>
+                </div>
+
+                <form asp-action="Edit" method="post" enctype="multipart/form-data" onsubmit="resetTabToProfile()">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Full Name</label>
+                            <input asp-for="Name" class="form-control" placeholder="Enter your name" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Phone Number</label>
+                            <input asp-for="Phone" class="form-control" placeholder="01xxxxxxxxx" />
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Update Profile Image</label>
+                            <input type="file" name="imageFile" class="form-control" />
+                            <small class="text-muted">Accepted formats: JPG, PNG. Max size: 2MB</small>
+                        </div>
+
+                        @if (Model.Role == "Technician")
+                        {
+                            <div class="col-12 mt-3">
+                                <label class="form-label">Skills & Expertise <span class="text-muted fw-normal">(Type and press Enter)</span></label>
+                                <input asp-for="Skills" class="form-control" placeholder="Add your skills..." />
+                            </div>
+
+                            <div class="col-12 mt-3">
+                                <label class="form-label">Certificates <span class="text-muted fw-normal">(Type and press Enter)</span></label>
+                                <input asp-for="Certificates" class="form-control" placeholder="Add your certificates..." />
+                            </div>
+                        }
+
+                        <div class="col-12 mt-4 text-center">
+                            <button type="submit" class="btn-save shadow">
+                                <i class="bi bi-check-lg me-2"></i>Save Changes
+                            </button>
+                            <a asp-action="Index" onclick="resetTabToProfile()" class="btn btn-link text-muted mt-2 d-block text-decoration-none">Cancel and back</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@@yaireo/tagify"></script>
+    <script>
+        function resetTabToProfile() {
+            localStorage.setItem("activeTab", "profileTab");
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            var skillsInput = document.querySelector('input[name=Skills]');
+            var certsInput = document.querySelector('input[name=Certificates]');
+
+            if (skillsInput) {
+                new Tagify(skillsInput, {
+                    originalInputValueFormat: valuesArr => valuesArr.map(item => item.value).join(',')
+                });
+            }
+            if (certsInput) {
+                new Tagify(certsInput, {
+                    originalInputValueFormat: valuesArr => valuesArr.map(item => item.value).join(',')
+                });
+            }
+        });
+    </script>
+}

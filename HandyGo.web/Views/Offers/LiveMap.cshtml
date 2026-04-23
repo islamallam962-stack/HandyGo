@@ -1,0 +1,190 @@
+@{
+    ViewData["Title"] = "«·Œ—Ìÿ… «· ›«⁄·Ì… ··›‰ÌÌ‰";
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+    #map {
+        height: 75vh;
+        width: 100%;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        z-index: 1;
+    }
+    .custom-popup .leaflet-popup-content-wrapper {
+        border-radius: 12px;
+        padding: 0;
+        overflow: hidden;
+    }
+    .custom-popup .leaflet-popup-content {
+        margin: 0;
+        width: 220px !important;
+    }
+
+    
+    .smart-marker-icon {
+        background: none;
+        border: none;
+    }
+    .marker-pin {
+        width: 34px;
+        height: 34px;
+        border-radius: 50% 50% 50% 0;
+        position: absolute;
+        transform: rotate(-45deg);
+        left: 50%;
+        top: 50%;
+        margin: -17px 0 0 -17px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+    }
+    .smart-marker-icon i {
+        position: absolute;
+        width: 26px;
+        height: 26px;
+        left: 4px;
+        top: 4px;
+        font-size: 16px;
+        text-align: center;
+        line-height: 26px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.9);
+        z-index: 1000;
+    }
+</style>
+
+<div class="container py-4">
+    
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-3">
+        <div>
+            <h3 class="fw-bold text-dark mb-1"><i class="bi bi-geo-alt-fill text-danger me-2"></i> «·—«œ«— «·–ﬂÌ ··›‰ÌÌ‰</h3>
+            <p class="text-muted mb-0"><i class="bi bi-broadcast me-1"></i> Ì⁄—÷ «·›‰ÌÌ‰ «·„ «ÕÌ‰ (‰‘ÿÌ‰ Œ·«· 24 ”«⁄…) ›Ì <strong>„ÕÌÿ 30 ﬂ„</strong>.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button onclick="getGPSLocation()" class="btn btn-primary rounded-pill px-3 fw-bold shadow-sm">
+                <i class="bi bi-crosshair me-1"></i>  ÕœÌœ „Êﬁ⁄Ì (GPS)
+            </button>
+            <a asp-action="Index" class="btn btn-outline-dark rounded-pill px-4 fw-bold">
+                <i class="bi bi-list-ul me-1"></i> «·ﬁ«∆„…
+            </a>
+        </div>
+    </div>
+
+    @if (ViewBag.TechsCount > 0)
+    {
+        <div class="alert alert-success rounded-pill py-2 px-4 d-inline-block shadow-sm mb-3 border-0">
+            <i class="bi bi-check-circle-fill me-1"></i> „ Ê›— <strong>@ViewBag.TechsCount ›‰ÌÌ‰</strong> »«·ﬁ—» „‰ﬂ «·¬‰!
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning rounded-pill py-2 px-4 d-inline-block shadow-sm mb-3 border-0">
+            <i class="bi bi-exclamation-circle-fill me-1"></i> ·« ÌÊÃœ ›‰ÌÌ‰ ‰‘ÿÌ‰ ›Ì „ÕÌÿ 30 ﬂ„. «”Õ» «·œ»Ê” «·√Õ„— ·„ﬂ«‰ ¬Œ— ··»ÕÀ.
+        </div>
+    }
+
+    <div class="position-relative">
+        <div id="map"></div>
+        
+        <div class="position-absolute bottom-0 start-0 m-3" style="z-index: 1000; pointer-events: none;">
+            <div class="bg-white p-3 rounded-4 shadow d-flex flex-column gap-2" style="opacity: 0.95;">
+                <h6 class="fw-bold mb-1 fs-6 border-bottom pb-2">„› «Õ «·Œ—Ìÿ…</h6>
+                <div class="d-flex align-items-center"><i class="bi bi-droplet-fill text-primary fs-5 me-2"></i> <span class="small fw-bold">”»«ﬂ</span></div>
+                <div class="d-flex align-items-center"><i class="bi bi-lightning-fill text-warning fs-5 me-2"></i> <span class="small fw-bold">ﬂÂ—»«∆Ì</span></div>
+                <div class="d-flex align-items-center"><i class="bi bi-snow text-info fs-5 me-2"></i> <span class="small fw-bold"> ﬂÌÌ›« </span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function getGPSLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+
+                window.location.href = `/Offers/LiveMap?lat=${position.coords.latitude}&lng=${position.coords.longitude}`;
+            }, function () {
+                alert("Ì—ÃÏ  ›⁄Ì· «·‹ GPS («·„Êﬁ⁄) ›Ì ÃÂ«“ﬂ Ê«·„Õ«Ê·… „—… √Œ—Ï.");
+            });
+        } else {
+            alert("„ ’›Õﬂ ·« Ìœ⁄„ Œ«’Ì…  ÕœÌœ «·„Êﬁ⁄.");
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var clientLat = @ViewBag.ClientLat;
+        var clientLng = @ViewBag.ClientLng;
+        var technicians = @Html.Raw(ViewBag.TechsJson);
+
+        var map = L.map('map').setView([clientLat, clientLng], 12);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© HandyGo Platform'
+        }).addTo(map);
+
+        L.circle([clientLat, clientLng], {
+            color: '#007bff',
+            fillColor: '#007bff',
+            fillOpacity: 0.05,
+            radius: 30000 
+        }).addTo(map);
+
+        var clientIcon = L.divIcon({
+            className: 'smart-marker-icon',
+            html: "<div class='marker-pin bg-danger'></div><i class='bi bi-person-fill text-danger'></i>",
+            iconSize: [34, 42], iconAnchor: [17, 42], popupAnchor: [0, -35]
+        });
+
+        var clientMarker = L.marker([clientLat, clientLng], {icon: clientIcon, draggable: true, zIndexOffset: 1000}).addTo(map)
+         .bindPopup('<div class="text-center p-2"><h6 class="text-danger fw-bold mb-1">„Êﬁ⁄ﬂ «·Õ«·Ì</h6><small>«”Õ» «·œ»Ê” · €ÌÌ— „Êﬁ⁄ «·»ÕÀ</small></div>').openPopup();
+
+        clientMarker.on('dragend', function(event) {
+            var position = clientMarker.getLatLng();
+
+            window.location.href = `/Offers/LiveMap?lat=${position.lat}&lng=${position.lng}`;
+        });
+
+        technicians.forEach(function (tech) {
+
+            var pinColorClass = 'bg-secondary';
+            var iconClass = 'bi-tools';
+            var iconColorClass = 'text-dark';
+
+            if(tech.category === 'Plumber') { pinColorClass = 'bg-primary'; iconClass = 'bi-droplet-fill'; iconColorClass = 'text-primary'; }
+            else if(tech.category === 'Electrician') { pinColorClass = 'bg-warning'; iconClass = 'bi-lightning-fill'; iconColorClass = 'text-warning'; }
+            else if(tech.category === 'AC') { pinColorClass = 'bg-info'; iconClass = 'bi-snow'; iconColorClass = 'text-info'; }
+
+            var customTechIcon = L.divIcon({
+                className: 'smart-marker-icon',
+                html: `<div class='marker-pin ${pinColorClass}'></div><i class='bi ${iconClass} ${iconColorClass}'></i>`,
+                iconSize: [34, 42], iconAnchor: [17, 42], popupAnchor: [0, -35]
+            });
+
+            var popupContent = `
+                <div class="custom-popup">
+                    <div style="background: url('${tech.image}') center/cover; height: 110px; width: 100%;"></div>
+                    <div class="p-3 text-center">
+                        <h6 class="fw-bold mb-1">${tech.name}</h6>
+                        <span class="badge ${pinColorClass} mb-2">${tech.category}</span>
+                        <p class="small text-muted mb-3"><i class="bi bi-geo-alt"></i> Ì»⁄œ ⁄‰ﬂ <strong>${tech.distance} ﬂ„</strong></p>
+                        <form action="/Offers/RequestService" method="post">
+                            <input type="hidden" name="technicianId" value="${tech.id}" />
+                            <input type="hidden" name="Address" value="„Êﬁ⁄ „Õœœ „‰ «·Œ—Ìÿ…" />
+                            <input type="hidden" name="Latitude" value="${clientLat}" />
+                            <input type="hidden" name="Longitude" value="${clientLng}" />
+                            <button type="submit" class="btn btn-sm btn-success fw-bold w-100 rounded-pill shadow-sm">
+                                <i class="bi bi-send me-1"></i> «ÿ·» «·Œœ„…
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            `;
+
+            L.marker([tech.lat, tech.lng], {icon: customTechIcon}).addTo(map)
+             .bindPopup(popupContent, { className: 'custom-popup' });
+        });
+    });
+</script>

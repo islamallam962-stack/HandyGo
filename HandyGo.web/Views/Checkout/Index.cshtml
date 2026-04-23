@@ -1,0 +1,144 @@
+@{
+    ViewData["Title"] = "≈ „«„ «·œ›⁄";
+    var tech = ViewBag.Technician as HandyGo.web.Models.User;
+    var req = ViewBag.Request as HandyGo.web.Models.Request;
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            
+            <h2 class="fw-bold mb-4 text-center"><i class="bi bi-wallet2 text-primary me-2"></i> ≈ „«„ «·œ›⁄</h2>
+
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4">
+                <div class="card-header bg-primary text-white p-4">
+                    <div class="d-flex align-items-center">
+                        <img src="@(tech.ImagePath ?? "/images/default.png")" class="rounded-circle border border-2 border-white me-3" width="60" height="60" style="object-fit:cover;">
+                        <div>
+                            <h5 class="mb-0 fw-bold">@tech.Name</h5>
+                            <span class="badge bg-light text-primary mt-1">@req.ServiceType Service</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4 bg-light">
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted fw-bold"> ﬂ·›… «·Œœ„… «·„ ›ﬁ ⁄·ÌÂ«:</span>
+                        <span class="fw-bold">@ViewBag.OriginalPrice Ã.„</span>
+                    </div>
+                    
+                    @if (ViewBag.SubDiscount > 0)
+                    {
+                        <div class="d-flex justify-content-between mb-2 text-success">
+                            <span class="fw-bold"><i class="bi bi-star-fill text-warning me-1"></i> Œ’„ »«ﬁ… «·⁄„Ì· «·„„Ì“:</span>
+                            <span class="fw-bold">- @ViewBag.SubDiscount Ã.„</span>
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-between mb-2 text-success d-none" id="discountRow">
+                        <span class="fw-bold"><i class="bi bi-tags-fill me-1"></i> Œ’„ «·ﬂÊ»Ê‰ «·≈÷«›Ì:</span>
+                        <span class="fw-bold" id="discountAmount">- 0 Ã.„</span>
+                    </div>
+
+                    <hr class="my-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0">«·≈Ã„«·Ì «·„ÿ·Ê» œ›⁄Â:</h5>
+                        <h3 class="fw-bold text-primary mb-0" id="finalTotal">@ViewBag.FinalPrice <span class="fs-6">Ã.„</span></h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <label class="fw-bold small mb-2 text-muted">Â· ·œÌﬂ ﬂÊœ Œ’„ ≈÷«›Ìø («Œ Ì«—Ì)</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="bi bi-ticket-perforated text-warning"></i></span>
+                        <input type="text" id="promoCodeInput" class="form-control border-start-0 text-uppercase" placeholder="√œŒ· «·ﬂÊœ Â‰«...">
+                        <button class="btn btn-dark px-4 fw-bold" type="button" id="applyPromoBtn" onclick="applyPromo()"> ÿ»Ìﬁ</button>
+                    </div>
+                    <div id="promoMessage" class="small fw-bold mt-2"></div>
+                </div>
+            </div>
+
+            <form asp-action="ProcessPayment" method="post">
+                <input type="hidden" name="requestId" value="@req.Id" />
+                <input type="hidden" name="technicianId" value="@tech.Id" />
+                <input type="hidden" name="price" value="@ViewBag.OriginalPrice" />
+                <input type="hidden" name="bidId" value="@ViewBag.BidId" />
+                <input type="hidden" name="promoCode" id="hiddenPromoCode" value="" />
+
+                <h5 class="fw-bold mb-3">«Œ — ÿ—Ìﬁ… «·œ›⁄:</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <input type="radio" class="btn-check" name="paymentMethod" id="payWallet" value="Wallet" required>
+                        <label class="btn btn-outline-primary w-100 h-100 p-3 rounded-4" for="payWallet">
+                            <i class="bi bi-wallet-fill fs-3 d-block mb-2"></i>
+                            <span class="fw-bold d-block">«·„Õ›Ÿ…</span>
+                            <small class="text-muted">—’Ìœﬂ: @ViewBag.ClientWalletBalance Ã.„</small>
+                        </label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="radio" class="btn-check" name="paymentMethod" id="payCard" value="CreditCard">
+                        <label class="btn btn-outline-primary w-100 h-100 p-3 rounded-4" for="payCard">
+                            <i class="bi bi-credit-card-2-front-fill fs-3 d-block mb-2"></i>
+                            <span class="fw-bold d-block">»ÿ«ﬁ… «∆ „«‰Ì…</span>
+                            <small class="text-muted">›Ì“« / „«” —ﬂ«—œ / „Ì“…</small>
+                        </label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="radio" class="btn-check" name="paymentMethod" id="payCash" value="Cash">
+                        <label class="btn btn-outline-primary w-100 h-100 p-3 rounded-4" for="payCash">
+                            <i class="bi bi-cash-stack fs-3 d-block mb-2"></i>
+                            <span class="fw-bold d-block">ﬂ«‘</span>
+                            <small class="text-muted">«·œ›⁄ Ìœ« »Ìœ ··›‰Ì</small>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-bold fs-5 shadow-sm">
+                    <i class="bi bi-check-circle-fill me-2"></i> ≈ „«„ «·œ›⁄ Ê √ﬂÌœ «·ÿ·»
+                </button>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function applyPromo() {
+    var code = document.getElementById('promoCodeInput').value;
+
+    var originalPrice = @ViewBag.FinalPrice;
+    var messageDiv = document.getElementById('promoMessage');
+        
+    if (!code) {
+    messageDiv.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-circle"></i> Ì—ÃÏ ≈œŒ«· «·ﬂÊœ √Ê·«.</span>';
+    return;
+    }
+
+    $.ajax({
+    url: '/Checkout/ApplyPromoCode',
+    type: 'POST',
+    data: { code: code, price: originalPrice },
+    success: function (response) {
+    if (response.success) {
+    messageDiv.innerHTML = '<span class="text-success"><i class="bi bi-check-circle-fill"></i> ' + response.message + '</span>';
+
+    document.getElementById('discountRow').classList.remove('d-none');
+    document.getElementById('discountAmount').innerText = "- " + response.discount.toFixed(2) + " Ã.„";
+    document.getElementById('finalTotal').innerHTML = response.newTotal.toFixed(2) + ' <span class="fs-6">Ã.„</span>';
+
+    document.getElementById('hiddenPromoCode').value = code;
+    document.getElementById('promoCodeInput').readOnly = true;
+    document.getElementById('applyPromoBtn').disabled = true;
+    } else {
+    messageDiv.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle-fill"></i> ' + response.message + '</span>';
+    }
+    },
+    error: function () {
+    messageDiv.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle-fill"></i> ÕœÀ Œÿ√ ›Ì «·« ’«· »«·”Ì—›—.</span>';
+    }
+    });
+    }
+</script>

@@ -1,0 +1,53 @@
+@model HandyGo.web.Models.User
+
+@{
+    var userAddress = ViewBag.UserAddress as string;
+}
+
+<form asp-controller="RequestServices"
+      asp-action="CreateDirect"
+      method="post">
+
+    <input type="hidden" name="TechnicianId" value="@Model.Id" />
+    <input type="hidden" name="ServiceType" value="@Model.Category" />
+
+    @if (string.IsNullOrEmpty(userAddress))
+    {
+        <!-- Ãæá ãÑÉ -->
+        <input type="text"
+               name="Address"
+               placeholder="Enter your address"
+               required />
+    }
+    else
+    {
+        <p>
+            <strong>Current Address:</strong><br />
+            @userAddress
+        </p>
+
+        <label>
+            <input type="radio" name="UseSameAddress" value="true" checked />
+            Use same address
+        </label>
+
+        <br />
+
+        <label>
+            <input type="radio" name="UseSameAddress" value="false" />
+            Change address
+        </label>
+
+        <input type="text"
+               name="NewAddress"
+               placeholder="New address"
+               oninput="this.previousElementSibling.previousElementSibling.checked = true;"
+               style="margin-top:5px;" />
+    }
+
+    <br /><br />
+    <button type="submit" class="btn btn-primary">
+        Request Service
+    </button>
+</form>
+
