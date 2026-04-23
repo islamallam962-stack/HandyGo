@@ -170,8 +170,10 @@ git clone https://github.com/islamallam962-stack/HandyGo.git
 cd HandyGo
 
 # 2. Add your appsettings.json with real credentials
-#2.1 dotnet restore
-#2.2 dotnet build
+#2.1
+dotnet restore
+#2.2
+dotnet build
 # 3. Apply migrations
 dotnet ef database update
 
