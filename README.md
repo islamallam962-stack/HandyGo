@@ -166,7 +166,7 @@ Create your own `appsettings.json` (not committed) using this template:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/YOUR_USERNAME/HandyGo.git
+git clone https://github.com/islamallam962-stack/HandyGo.git
 cd HandyGo
 
 # 2. Add your appsettings.json with real credentials
