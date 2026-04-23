@@ -188,8 +188,7 @@ dotnet run --project HandyGo.web
 
 ## 👨‍💻 Author
 
-Built by **[Your Name]** — feel free to connect on [LinkedIn](https://linkedin.com/in/yourprofile)
-
+**Islam Allam** [LinkedIn Profile](https://www.linkedin.com/in/islam-allam-1a4bb73a9/)
 ---
 
 ---
@@ -287,6 +286,7 @@ HandyGo منصة خدمات مبنية للسوق المصري، بتخلي ال
 
 ## 👨‍💻 المطور
 
-تم البناء بواسطة **[اسمك]** — تواصل معي على [LinkedIn](https://linkedin.com/in/yourprofile)
-
+---
+### 👨‍💻 Developed By:
+**Islam Allam** [LinkedIn Profile](https://www.linkedin.com/in/islam-allam-1a4bb73a9/)
 </div>
